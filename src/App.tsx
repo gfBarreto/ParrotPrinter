@@ -14,7 +14,7 @@ import { DashboardView } from './components/DashboardView';
 import { TriggerConfig } from './components/TriggerConfig';
 import { LogTable } from './components/LogTable';
 // @ts-ignore
-import logoUrl from './assets/images/parrot_logo_dark_1781810861177.jpg';
+import logoUrl from './assets/images/regenerated_image_1781812433016.png';
 import { 
   Radio, ShieldAlert, Activity, Database, CheckSquare, Settings, 
   Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders
@@ -605,11 +605,11 @@ export default function App() {
         <div>
           {/* Brand Logo Only (top) */}
           <div className="p-6 flex flex-col items-center justify-center border-b border-zinc-800">
-            <div className="w-[170px] h-[170px] bg-transparent border-none p-0 overflow-hidden flex items-center justify-center transition-transform hover:scale-105 duration-300">
+            <div className="w-[220px] h-[220px] bg-transparent border-none p-0 overflow-hidden flex items-center justify-center transition-transform hover:scale-105 duration-300">
               <img 
                 src={logoUrl} 
                 alt="ParrotPrinter Logo" 
-                className="w-full h-full object-contain bg-transparent border-none"
+                className="w-full h-full object-contain bg-transparent border-none rounded-xl"
                 referrerPolicy="no-referrer"
               />
             </div>
