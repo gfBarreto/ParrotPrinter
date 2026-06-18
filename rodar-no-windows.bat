@@ -6,12 +6,12 @@ echo ==========================================================
 echo.
 echo Este script ira iniciar o monitor das suas impressoras 3D localmente.
 echo Isso resolve o erro "The operation is insecure" (Mixed Content do HTTPS)
-echo e permite que o aplicativo conecte em IPs locais (Ex: 172.16.1.x) da sua rede.
+echo e permite que o aplicativo conecte em IPs locais da sua rede.
 echo.
 
-:: Tentativa simples de rodar instalador de dependências se não existirem
+:: Tentativa simples de rodar instalador de dependencias se nao existirem
 if not exist node_modules (
-    echo [1/2] Pasta node_modules nao encontrada. Instalando dependencias locais (aguarde)...
+    echo [1/2] Pasta node_modules nao encontrada. Instalando dependencias locais, por favor aguarde...
     echo.
     call npm install
 ) else (
