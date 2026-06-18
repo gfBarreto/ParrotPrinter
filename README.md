@@ -46,12 +46,11 @@ Se você editou ou criou o projeto no AI Studio, você pode integrá-lo com seu 
 Agora que a pasta está sincronizada com o GitHub:
 * Dê dois cliques em **`rodar-oculto`** para inicializar o painel e as conexões!
 
----
 ### Passo 4: Nas macros a serem utilizadas no klipper, verificar se existe a linha abaixo como exemplo:
 
 **`RESPOND TYPE=command MSG="print_started" #envia mensagem de inicializar a impressão para o ParrotPrinter`**
 
-
+---
 ## 🔄 Como Atualizar o ParrotPrinter
 
 Quando você ou a IA fizerem novas melhorias no projeto, você poderá sincronizá-las no seu computador local instantaneamente através de duas formas:
