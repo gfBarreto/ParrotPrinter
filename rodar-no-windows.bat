@@ -8,40 +8,31 @@ echo Este script ira iniciar o monitor das suas impressoras 3D localmente.
 echo Isso resolve o erro "The operation is insecure" (Mixed Content do HTTPS)
 echo e permite que o aplicativo conecte em IPs locais (Ex: 172.16.1.x) da sua rede.
 echo.
-echo Requisitos: Node.js instalado (https://nodejs.org)
-echo.
 
-node -v >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ALERTA] O Node.js nao foi encontrado no seu sistema!
+:: Tentativa simples de rodar instalador de dependências se não existirem
+if not exist node_modules (
+    echo [1/2] Pasta node_modules nao encontrada. Instalando dependencias locais (aguarde)...
     echo.
-    echo Para rodar o app local em sua rede, siga os passos abaixo:
-    echo 1. Baixe e instale o Node.js LTS em: https://nodejs.org
-    echo 2. Execute o instalador baixado clicando em "Next" ate o final.
-    echo 3. IMPORTANTE: Feche TODAS as suas janelas do Prompt de Comando (CMD) 
-    echo    e do Explorador de Arquivos para aplicar as variaveis de sistema.
-    echo 4. Abra esta pasta novamente e de dois cliques em "rodar-no-windows.bat".
-    echo.
-    echo Se voce acabou de instalar o Node.js, feche esta tela preta e abra-a novamente!
-    echo.
-    pause
-    exit /b
+    call npm install
+) else (
+    echo [1/2] Dependencias ja identificadas na pasta local.
 )
 
-echo [1/3] Instalando dependencias locais do projeto (aguarde)...
-call npm install
-
-echo [2/3] Gerando build estatica de producao...
-call npm run build
-
-echo [3/3] Iniciando o servidor web local...
+echo.
+echo [2/2] Iniciando o servidor local em modo desenvolvimento (npm run dev)...
 echo.
 echo ==========================================================
-echo SUCESSO! O painel esta rodando localmente.
-echo Acesse o link abaixo no seu navegador:
+echo SUCESSO! O painel iniciara localmente.
+echo Acesse o link abaixo no seu navegador se nao abrir automaticamente:
 echo ===^> http://localhost:3000
 echo ==========================================================
 echo.
+
+:: Aguarda 2 segundos e abre o navegador
+timeout /t 2 /nobreak >nul 2>&1
 start http://localhost:3000
-call npm run start
+
+:: Inicia o servidor local
+call npm run dev
+
 pause
