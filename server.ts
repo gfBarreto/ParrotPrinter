@@ -12,13 +12,15 @@ interface Printer {
   port: number;
   enabled: boolean;
   connectionStatus?: string;
+  bytesReceived?: number;
+  lastSeen?: string;
 }
 
 interface EventTrigger {
   id: string;
   name: string;
   pattern: string;
-  soundType: 'synth' | 'speech' | 'audio';
+  soundType: 'synth' | 'speech' | 'upload' | 'url';
   soundValue: string;
   voiceLanguage?: 'pt-BR' | 'en-US';
   enabled: boolean;
@@ -45,6 +47,7 @@ try {
 // Background Moonraker WS connection registry
 const activeConnections = new Map<string, NodeWebSocket>();
 const reconnectTimers = new Map<string, NodeJS.Timeout>();
+const connectionDetails = new Map<string, { ip: string; port: number }>();
 
 function checkLineMatchesPattern(line: string, pattern: string): boolean {
   const cleanLine = line.toLowerCase().trim();
@@ -65,7 +68,7 @@ function checkLineMatchesPattern(line: string, pattern: string): boolean {
   return false;
 }
 
-// OS Audio Player using built-in PowerShell commands (no extra NPM dependencies required!)
+// OS Audio Player using encoded PowerShell scripts for maximum escape-safety and reliability
 function playLocalSystemAlert(trigger: EventTrigger, printerName: string, consoleLine: string) {
   if (process.platform !== 'win32') {
     console.log(`[Sound Bypassed] Alerta local faria som no Windows: "${trigger.name}" para a impressora ${printerName}`);
@@ -76,62 +79,158 @@ function playLocalSystemAlert(trigger: EventTrigger, printerName: string, consol
 
   if (trigger.soundType === 'synth') {
     const preset = trigger.soundValue;
+    // We play built-in Windows WAV sounds using SoundPlayer for 100% guarantee that they play through default audio card/speakers (instead of motherboard pc beeper)
     if (preset === 'chime-up') {
-      psScript = `[console]::beep(523, 100); [console]::beep(659, 100); [console]::beep(784, 100); [console]::beep(1046, 150)`;
+      psScript = `
+        $player = New-Object System.Media.SoundPlayer;
+        $player.SoundLocation = "C:\\Windows\\Media\\Speech On.wav";
+        if (Test-Path $player.SoundLocation) { $player.PlaySync() } else { [System.Media.SystemSounds]::Asterisk.Play() }
+      `;
     } else if (preset === 'chime-down') {
-      psScript = `[console]::beep(880, 120); [console]::beep(698, 120); [console]::beep(587, 120); [console]::beep(440, 150)`;
+      psScript = `
+        $player = New-Object System.Media.SoundPlayer;
+        $player.SoundLocation = "C:\\Windows\\Media\\Speech Off.wav";
+        if (Test-Path $player.SoundLocation) { $player.PlaySync() } else { [System.Media.SystemSounds]::Hand.Play() }
+      `;
     } else if (preset === 'alarm-loop') {
-      psScript = `For ($i=0; $i -lt 3; $i++) { [console]::beep(880, 150); [console]::beep(660, 150) }`;
+      psScript = `
+        $player = New-Object System.Media.SoundPlayer;
+        $player.SoundLocation = "C:\\Windows\\Media\\Alarm01.wav";
+        if (-not (Test-Path $player.SoundLocation)) { $player.SoundLocation = "C:\\Windows\\Media\\Ring01.wav" };
+        if (-not (Test-Path $player.SoundLocation)) { $player.SoundLocation = "C:\\Windows\\Media\\notify.wav" };
+        if (Test-Path $player.SoundLocation) { 
+          For ($i=0; $i -lt 3; $i++) { $player.PlaySync() }
+        } else {
+          For ($i=0; $i -lt 5; $i++) { [System.Media.SystemSounds]::Beep.Play(); Start-Sleep -Milliseconds 300 }
+        }
+      `;
     } else if (preset === 'beep-multiple') {
-      psScript = `[console]::beep(1200, 80); Start-Sleep -Milliseconds 50; [console]::beep(1200, 80); Start-Sleep -Milliseconds 50; [console]::beep(1200, 80)`;
+      psScript = `
+        $player = New-Object System.Media.SoundPlayer;
+        $player.SoundLocation = "C:\\Windows\\Media\\notify.wav";
+        if (Test-Path $player.SoundLocation) {
+          For ($i=0; $i -lt 3; $i++) { $player.PlaySync(); Start-Sleep -Milliseconds 80 }
+        } else {
+          For ($i=0; $i -lt 3; $i++) { [System.Media.SystemSounds]::Beep.Play(); Start-Sleep -Milliseconds 150 }
+        }
+      `;
     } else if (preset === 'laser') {
-      psScript = `For ($f=1500; $f -gt 240; $f-=120) { [console]::beep($f, 20) }`;
+      psScript = `
+        try {
+          For ($f=1200; $f -gt 300; $f-=150) { [console]::beep($f, 40) }
+        } catch {
+          [System.Media.SystemSounds]::Asterisk.Play()
+        }
+      `;
     } else {
-      psScript = `[console]::beep(440, 300)`;
+      psScript = `[System.Media.SystemSounds]::Beep.Play()`;
     }
   } else if (trigger.soundType === 'speech') {
     // Generate vocalized TTS
     let speakText = trigger.soundValue;
     if (!speakText) {
       if (trigger.name === 'Print Started') {
-        speakText = `Impressão iniciada na ${printerName}`;
+        speakText = `Impressão iniciada na impressora ${printerName}`;
       } else if (trigger.name === 'Print Done') {
-        speakText = `Impressão concluída na ${printerName}`;
+        speakText = `Atenção! A impressora ${printerName} concluiu a impressão com sucesso!`;
       } else if (trigger.name === 'Print Failed') {
-        speakText = `Atenção: A impressão na ${printerName} falhou`;
+        speakText = `Alerta! Falha na impressão da impressora ${printerName}! Verifique por favor.`;
       } else if (trigger.name === 'Print Pause') {
-        speakText = `A impressão na ${printerName} foi pausada`;
+        speakText = `A impressora ${printerName} foi pausada.`;
       } else if (trigger.name === 'Filament Change') {
-        speakText = `Aviso: Troca de filamento necessária na ${printerName}`;
+        speakText = `Hora de trocar o filamento na impressora ${printerName}.`;
       } else {
-        speakText = `Aviso acionado na impressora ${printerName}`;
+        speakText = `Alerta customizado na impressora ${printerName}`;
       }
     }
 
-    // Sanitize string to prevent PowerShell code injection
-    const cleanMsg = speakText.replace(/[^a-zA-Z0-9 áéíóúâêîôûãõçÁÉÍÓÚÂÊÎÔÛÃÕÇ:\-!,.]/g, '');
+    const cleanMsg = speakText.replace(/['"$;`()]/g, ''); // Clear quotes and control characters
     const voiceLang = trigger.voiceLanguage || 'pt-BR';
 
     psScript = `
-      Add-Type -AssemblyName System.Speech;
-      $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer;
-      $voice = $synth.GetInstalledVoices() | Where-Object { $_.VoiceInfo.Culture.Name -eq '${voiceLang}' } | Select-Object -First 1;
-      if ($voice) { $synth.SelectVoice($voice.VoiceInfo.Name) };
-      $synth.Speak('${cleanMsg}');
-    `.trim().replace(/\s+/g, ' ');
+      try {
+        Add-Type -AssemblyName System.Speech;
+        $synth = New-Object System.Speech.Synthesis.SpeechSynthesizer;
+        $voice = $synth.GetInstalledVoices() | Where-Object { $_.VoiceInfo.Culture.Name -eq '${voiceLang}' } | Select-Object -First 1;
+        if ($voice) { $synth.SelectVoice($voice.VoiceInfo.Name) };
+        $synth.Speak("${cleanMsg}");
+      } catch {
+        [System.Media.SystemSounds]::Beep.Play()
+      }
+    `;
+  } else if (trigger.soundType === 'upload' && trigger.soundValue.startsWith('data:audio/')) {
+    try {
+      const match = trigger.soundValue.match(/^data:audio\/(\w+);base64,(.+)$/);
+      if (match) {
+        const ext = match[1] === 'mpeg' ? 'mp3' : match[1];
+        const base64Data = match[2];
+        const tempFileName = `temp_alert_${trigger.id}.${ext}`;
+        const tempFilePath = path.join(process.cwd(), tempFileName);
+        
+        fs.writeFileSync(tempFilePath, Buffer.from(base64Data, 'base64'));
+        const escapedPath = tempFilePath.replace(/\\/g, '\\\\');
+
+        psScript = `
+          try {
+            Add-Type -AssemblyName PresentationCore;
+            $player = New-Object System.Windows.Media.MediaPlayer;
+            $player.Open("${escapedPath}");
+            $player.Play();
+            Start-Sleep -Seconds 6;
+            $player.Close();
+          } catch {
+            [System.Media.SystemSounds]::Asterisk.Play();
+          } finally {
+            if (Test-Path "${escapedPath}") { Remove-Item "${escapedPath}" -Force }
+          }
+        `;
+      } else {
+        psScript = `[System.Media.SystemSounds]::Asterisk.Play()`;
+      }
+    } catch (err) {
+      console.error(`[Acoustic Driver] Falha ao processar arquivo de áudio carregado base64:`, err);
+      psScript = `[System.Media.SystemSounds]::Asterisk.Play()`;
+    }
+  } else if (trigger.soundType === 'url' && trigger.soundValue) {
+    const cleanUrl = trigger.soundValue.replace(/["'$;`]/g, '');
+    const ext = cleanUrl.split('.').pop()?.split('?')[0] || 'mp3';
+    const tempFileName = `temp_url_alert_${trigger.id}.${ext}`;
+    const tempFilePath = path.join(process.cwd(), tempFileName);
+    const escapedPath = tempFilePath.replace(/\\/g, '\\\\');
+
+    psScript = `
+      try {
+        $webClient = New-Object System.Net.WebClient;
+        $webClient.DownloadFile("${cleanUrl}", "${escapedPath}");
+        if (Test-Path "${escapedPath}") {
+          Add-Type -AssemblyName PresentationCore;
+          $player = New-Object System.Windows.Media.MediaPlayer;
+          $player.Open("${escapedPath}");
+          $player.Play();
+          Start-Sleep -Seconds 6;
+          $player.Close();
+        }
+      } catch {
+        [System.Media.SystemSounds]::Asterisk.Play();
+      } finally {
+        if (Test-Path "${escapedPath}") { Remove-Item "${escapedPath}" -Force }
+      }
+    `;
   } else {
-    // Default simple Windows system chime
     psScript = `[System.Media.SystemSounds]::Beep.Play()`;
   }
 
-  // Run the code
+  // Execute using -EncodedCommand for 100% robust string/quote escaping on Windows Command Prompt
   if (psScript) {
-    const command = `powershell -NoProfile -Command "${psScript}"`;
-    exec(command, (err) => {
+    const utf16leBuffer = Buffer.from(psScript.trim(), 'utf16le');
+    const base64Command = utf16leBuffer.toString('base64');
+    const command = `powershell -NoProfile -EncodedCommand ${base64Command}`;
+
+    exec(command, (err, stdout, stderr) => {
       if (err) {
-        console.error(`[Acoustic Driver] Falha ao tocar som em segundo plano via PowerShell:`, err.message);
+        console.error(`[Acoustic Driver] Falha ao executar som em segundo plano:`, err.message);
       } else {
-        console.log(`[Acoustic Driver] Sucesso no som em segundo plano (${trigger.soundType}) para "${printerName}"!`);
+        console.log(`[Acoustic Driver] Alerta sonoro de segundo plano executado com sucesso (${trigger.soundType}) para a impressora "${printerName}".`);
       }
     });
   }
@@ -147,6 +246,7 @@ function connectBackgroundPrinter(printer: Printer) {
       activeConnections.get(id)?.close();
     } catch {}
     activeConnections.delete(id);
+    connectionDetails.delete(id);
   }
 
   // Clear timers
@@ -158,14 +258,15 @@ function connectBackgroundPrinter(printer: Printer) {
   if (!printer.enabled) return;
 
   const wsUrl = `ws://${printer.ip}:${printer.port}/websocket`;
-  console.log(`[Monitor Background] Conectando ao Moonraker de "${printer.name}" (${printer.ip}:${printer.port})...`);
+  console.log(`[Monitor Background] Tentando escuta direta em "${printer.name}" (${printer.ip}:${printer.port})...`);
 
   try {
     const ws = new NodeWebSocket(wsUrl, { handshakeTimeout: 5000 });
     activeConnections.set(id, ws);
+    connectionDetails.set(id, { ip: printer.ip, port: printer.port });
 
     ws.on('open', () => {
-      console.log(`[Monitor Background] Conectado com sucesso em "${printer.name}"!`);
+      console.log(`[Monitor Background] Conectado e monitorando em segundo plano: "${printer.name}"!`);
       // Subscribe to logs
       ws.send(JSON.stringify({
         jsonrpc: '2.0',
@@ -184,7 +285,7 @@ function connectBackgroundPrinter(printer: Printer) {
             // Compare each line with the live triggers list
             triggers.forEach((trig) => {
               if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
-                console.log(`[Gatilho ATIVADO] "${trig.name}" correspondido em "${printer.name}": "${line}"`);
+                console.log(`[Monitor Background] Gatilho "${trig.name}" ativado por: "${line}"`);
                 playLocalSystemAlert(trig, printer.name, line);
               }
             });
@@ -196,12 +297,13 @@ function connectBackgroundPrinter(printer: Printer) {
     });
 
     ws.on('error', (err) => {
-      console.log(`[Monitor Background] Erro de conexao em "${printer.name}" ou impressora offline.`);
+      console.log(`[Monitor Background] Erro na conexao com a impressora "${printer.name}". Certifique-se que ela esta online.`);
     });
 
     ws.on('close', () => {
-      console.log(`[Monitor Background] Conexao com "${printer.name}" fechada. Reconectando em 15s...`);
+      console.log(`[Monitor Background] Conexão com "${printer.name}" perdida. Reconectando em 15s...`);
       activeConnections.delete(id);
+      connectionDetails.delete(id);
       
       const timer = setTimeout(() => {
         connectBackgroundPrinter(printer);
@@ -210,7 +312,7 @@ function connectBackgroundPrinter(printer: Printer) {
     });
 
   } catch (err) {
-    console.warn(`[Monitor Background] Falha ao criar tunel WebSocket em "${printer.name}":`, err);
+    console.warn(`[Monitor Background] Falha ao criar tunel WebSocket para "${printer.name}":`, err);
     const timer = setTimeout(() => {
       connectBackgroundPrinter(printer);
     }, 15000);
@@ -218,7 +320,7 @@ function connectBackgroundPrinter(printer: Printer) {
   }
 }
 
-// Sincroniza todas as conexoes de background com as novas configuracoes do client
+// Sincroniza conexoes de background
 function rebuildConnections() {
   // Clear any timers
   for (const [id, timer] of reconnectTimers.entries()) {
@@ -226,7 +328,7 @@ function rebuildConnections() {
   }
   reconnectTimers.clear();
 
-  // Close other connections not present or now disabled
+  // Close connections that are no longer enabled
   for (const [id, ws] of activeConnections.entries()) {
     const p = printers.find(x => x.id === id);
     if (!p || !p.enabled) {
@@ -234,16 +336,19 @@ function rebuildConnections() {
         ws.close();
       } catch {}
       activeConnections.delete(id);
-      console.log(`[Monitor Background] Conexao encerrada ou desabilitada para impressora ID ${id}.`);
+      connectionDetails.delete(id);
+      console.log(`[Monitor Background] Desativada escuta para a impressora ID: ${id}`);
     }
   }
 
-  // Connect or re-evaluate enabled printers
+  // Connect or reconnect modified printers
   printers.forEach((p) => {
     if (p.enabled) {
       const activeWs = activeConnections.get(p.id);
+      const details = connectionDetails.get(p.id);
+      
       // If we don't have connection or IP/port changed, rebuild!
-      if (!activeWs) {
+      if (!activeWs || !details || details.ip !== p.ip || details.port !== p.port) {
         connectBackgroundPrinter(p);
       }
     }
