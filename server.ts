@@ -24,6 +24,8 @@ interface EventTrigger {
   soundValue: string;
   voiceLanguage?: 'pt-BR' | 'en-US';
   enabled: boolean;
+  printerId?: string;
+  description?: string;
 }
 
 const CONFIG_FILE_PATH = path.join(process.cwd(), "klipper-hub-config.json");
@@ -282,7 +284,8 @@ function connectBackgroundPrinter(printer: Printer) {
           lines.forEach((line) => {
             // Compare each line with the live triggers list
             triggers.forEach((trig) => {
-              if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
+              const isTriggerForPrinter = !trig.printerId || trig.printerId === id;
+              if (trig.enabled && isTriggerForPrinter && checkLineMatchesPattern(line, trig.pattern)) {
                 console.log(`[Monitor Background] Gatilho "${trig.name}" ativado por: "${line}"`);
                 playLocalSystemAlert(trig, printer.name, line);
               }
@@ -404,7 +407,8 @@ async function startServer() {
 
     // Compare and play audios on host machine
     triggers.forEach((trig) => {
-      if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
+      const isTriggerForPrinter = !trig.printerId || trig.printerId === printerId;
+      if (trig.enabled && isTriggerForPrinter && checkLineMatchesPattern(line, trig.pattern)) {
         console.log(`[Simulação Background] Coincidencia detectada com "${trig.name}"!`);
         playLocalSystemAlert(trig, printer.name, line);
       }

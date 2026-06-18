@@ -21,6 +21,7 @@ interface DashboardViewProps {
   activePrinterId: string;
   setActivePrinterId: (id: string) => void;
   terminalLines: Record<string, string[]>;
+  globalTerminalLines: { printerId: string, printerName: string, text: string, timestamp: string }[];
   onTogglePrinterEnabled: (id: string) => void;
   onAddPrinter: (printer: Omit<Printer, 'id' | 'connectionStatus'>) => void;
   onUpdatePrinter: (printer: Printer) => void;
@@ -39,6 +40,7 @@ export function DashboardView({
   activePrinterId,
   setActivePrinterId,
   terminalLines,
+  globalTerminalLines,
   onTogglePrinterEnabled,
   onAddPrinter,
   onUpdatePrinter,
@@ -63,6 +65,7 @@ export function DashboardView({
   const [selectedTriggerIds, setSelectedTriggerIds] = useState<string[]>([]);
 
   const [editingPrinterId, setEditingPrinterId] = useState<string | null>(null);
+  const [monitorMode, setMonitorMode] = useState<'individual' | 'all'>('individual');
 
   const handleSubmitPrinter = (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,7 +166,7 @@ export function DashboardView({
       )}
 
       {/* Grid status cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Connection status */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-4 shadow-md">
           <div className="p-3 rounded-lg bg-emerald-500/10 text-emerald-400">
@@ -201,18 +204,6 @@ export function DashboardView({
               {triggers.filter(t => t.enabled).length} Ativos
             </div>
             <p className="text-[10px] text-zinc-400 mt-0.5">{triggers.length} padrões programados</p>
-          </div>
-        </div>
-
-        {/* System parameters */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-4 shadow-md">
-          <div className="p-3 rounded-lg bg-indigo-500/10 text-indigo-400">
-            <Settings className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="text-xs text-zinc-500 font-semibold uppercase">Plataforma</div>
-            <div className="font-bold text-lg text-white">Windows Hub</div>
-            <p className="text-[10px] text-zinc-400 mt-0.5">Substituto local para macOS</p>
           </div>
         </div>
       </div>
@@ -482,42 +473,99 @@ export function DashboardView({
 
         {/* Console / Terminal Section on Right Column */}
         <div className="xl:col-span-1 space-y-4">
+          {/* Monitor Mode Switch Bar */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex items-center justify-between gap-1.5 shadow-md">
+            <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest select-none">Modo de Escuta:</span>
+            <div className="flex bg-zinc-950 border border-zinc-850 p-1 rounded-lg">
+              <button
+                id="btn-monitor-mode-individual"
+                type="button"
+                onClick={() => setMonitorMode('individual')}
+                className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md tracking-wider transition-all cursor-pointer ${
+                  monitorMode === 'individual'
+                    ? 'bg-zinc-800 text-zinc-100 shadow'
+                    : 'text-zinc-500 hover:text-zinc-350'
+                }`}
+              >
+                Individual
+              </button>
+              <button
+                id="btn-monitor-mode-all"
+                type="button"
+                onClick={() => setMonitorMode('all')}
+                className={`px-3 py-1 text-[10px] font-bold uppercase rounded-md tracking-wider transition-all cursor-pointer ${
+                  monitorMode === 'all'
+                    ? 'bg-emerald-600 text-white shadow'
+                    : 'text-zinc-500 hover:text-zinc-350'
+                }`}
+              >
+                Todas
+              </button>
+            </div>
+          </div>
+
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-lg text-white tracking-tight flex items-center gap-1.5">
               <Terminal className="w-4 h-4 text-emerald-400" />
               Terminal de G-Code
             </h2>
-            <select
-              id="console-printer-selector"
-              value={activePrinterId}
-              onChange={(e) => setActivePrinterId(e.target.value)}
-              className="bg-zinc-950 border border-zinc-800 text-xs text-zinc-350 rounded px-2.5 py-1 select-none focus:outline-none focus:border-zinc-700"
-            >
-              {printers.map((p) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-              {printers.length === 0 && <option value="">Sem Impressoras</option>}
-            </select>
+            {monitorMode === 'individual' ? (
+              <select
+                id="console-printer-selector"
+                value={activePrinterId}
+                onChange={(e) => setActivePrinterId(e.target.value)}
+                className="bg-zinc-950 border border-zinc-800 text-xs text-zinc-350 rounded px-2.5 py-1 select-none focus:outline-none focus:border-zinc-700"
+              >
+                {printers.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+                {printers.length === 0 && <option value="">Sem Impressoras</option>}
+              </select>
+            ) : (
+              <span className="text-[9px] bg-emerald-950 text-emerald-400 font-extrabold border border-emerald-900 px-2 py-0.5 rounded tracking-wide uppercase">
+                Filtrando {printers.length} Impressoras
+              </span>
+            )}
           </div>
 
           <div className="bg-zinc-950 border border-zinc-850 rounded-xl p-4 shadow-inner flex flex-col h-[340px] justify-between relative overflow-hidden">
             {/* Console Screen */}
             <div className="font-mono text-[11px] text-zinc-400 space-y-1.5 overflow-y-auto flex-1 scrollbar-thin scroll-smooth select-all pr-2">
-              {activePrinterId && terminalLines[activePrinterId]?.length > 0 ? (
-                terminalLines[activePrinterId].map((line, idx) => (
-                  <div key={idx} className="leading-5 border-l-2 border-zinc-850/60 pl-2 py-0.5 hover:bg-zinc-900/40 rounded transition-colors break-all">
-                    <span className="text-zinc-600 mr-2">[{new Date().toLocaleTimeString()}]</span>
-                    <span className={line.includes('//') ? 'text-emerald-400 font-semibold' : 'text-zinc-350'}>
-                      {line}
-                    </span>
+              {monitorMode === 'individual' ? (
+                activePrinterId && terminalLines[activePrinterId]?.length > 0 ? (
+                  terminalLines[activePrinterId].map((line, idx) => (
+                    <div key={idx} className="leading-5 border-l-2 border-zinc-850/60 pl-2 py-0.5 hover:bg-zinc-900/40 rounded transition-colors break-all">
+                      <span className="text-zinc-600 mr-2">[{new Date().toLocaleTimeString()}]</span>
+                      <span className={line.includes('//') ? 'text-emerald-400 font-semibold' : 'text-zinc-350'}>
+                        {line}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-zinc-550 select-none">
+                    <Terminal className="w-8 h-8 text-zinc-750 mb-2" />
+                    <p>Aguardando dados G-code...</p>
+                    <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">Selecione uma impressora conectada para inspecionar</p>
                   </div>
-                ))
+                )
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center text-zinc-550 select-none">
-                  <Terminal className="w-8 h-8 text-zinc-750 mb-2" />
-                  <p>Aguardando dados G-code...</p>
-                  <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">Selecione uma impressora conectada para inspecionar</p>
-                </div>
+                globalTerminalLines.length > 0 ? (
+                  globalTerminalLines.map((lineItem, idx) => (
+                    <div key={idx} className="leading-5 border-l-2 border-emerald-950 pl-2 py-0.5 hover:bg-zinc-900/40 rounded transition-colors break-all">
+                      <span className="text-zinc-500 mr-1.5 font-bold font-sans text-[8px] bg-zinc-900 border border-zinc-800 px-1 py-0.2 rounded tracking-wide uppercase">{lineItem.printerName}</span>
+                      <span className="text-zinc-600 mr-2">[{lineItem.timestamp}]</span>
+                      <span className={lineItem.text.includes('//') ? 'text-emerald-400 font-semibold' : 'text-zinc-350'}>
+                        {lineItem.text}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-zinc-550 select-none">
+                    <Terminal className="w-8 h-8 text-zinc-750 mb-2" />
+                    <p>Aguardando fluxo de dados geral...</p>
+                    <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">A atividade de todas as impressoras aparecerá consolidada aqui</p>
+                  </div>
+                )
               )}
             </div>
 

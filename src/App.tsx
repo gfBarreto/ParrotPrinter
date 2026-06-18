@@ -13,6 +13,8 @@ import { triggerSoundAlert } from './utils/audio';
 import { DashboardView } from './components/DashboardView';
 import { TriggerConfig } from './components/TriggerConfig';
 import { LogTable } from './components/LogTable';
+// @ts-ignore
+import logoUrl from './assets/images/parrot_logo_dark_1781810861177.jpg';
 import { 
   Radio, ShieldAlert, Activity, Database, CheckSquare, Settings, 
   Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders
@@ -93,6 +95,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'triggers' | 'logs'>('dashboard');
   const [activePrinterId, setActivePrinterId] = useState<string>('');
   const [terminalLines, setTerminalLines] = useState<Record<string, string[]>>({});
+  const [globalTerminalLines, setGlobalTerminalLines] = useState<{ printerId: string, printerName: string, text: string, timestamp: string }[]>([]);
   
   // Anti-blocking state since modern browser requirements block audio alerts before first page click
   const [audioBlockerActive, setAudioBlockerActive] = useState(true);
@@ -272,6 +275,18 @@ export default function App() {
               [id]: [...(prev[id] || []), ...lines].slice(-40)
             }));
 
+            const currentPrDefault = printersRef.current.find(p => p.id === id);
+            const printerName = currentPrDefault ? currentPrDefault.name : 'Impressora';
+            setGlobalTerminalLines(prev => [
+              ...prev,
+              ...lines.map((line: string) => ({
+                printerId: id,
+                printerName,
+                text: line,
+                timestamp: new Date().toLocaleTimeString()
+              }))
+            ].slice(-100));
+
             // Test line outputs against custom alert filters
             lines.forEach((line: string) => {
               // Find latest printer setup
@@ -281,10 +296,10 @@ export default function App() {
               // Iterate through cached triggers (look up state triggers directly)
               setTriggers(latestTriggers => {
                 latestTriggers.forEach((trig) => {
-                  // Check if trigger is enabled on system and specifically for this printer
-                  const isTriggerEnabledOnPrinter = !currentPr.enabledTriggers || currentPr.enabledTriggers.includes(trig.id);
+                  // Check if trigger belongs to this printer or is generic
+                  const isTriggerForPrinter = !trig.printerId || trig.printerId === id;
 
-                  if (trig.enabled && isTriggerEnabledOnPrinter && checkLineMatchesPattern(line, trig.pattern)) {
+                  if (trig.enabled && isTriggerForPrinter && checkLineMatchesPattern(line, trig.pattern)) {
                     // Match found! Sound the alarm!
                     triggerSoundAlert(
                       trig.soundType, 
@@ -372,11 +387,21 @@ export default function App() {
       [printerId]: [...(prev[printerId] || []), line].slice(-40)
     }));
 
+    setGlobalTerminalLines(prev => [
+      ...prev,
+      {
+        printerId,
+        printerName: printer.name,
+        text: line,
+        timestamp: new Date().toLocaleTimeString()
+      }
+    ].slice(-100));
+
     // Trigger check
     triggers.forEach((trig) => {
-      const isTriggerEnabledOnPrinter = !printer.enabledTriggers || printer.enabledTriggers.includes(trig.id);
+      const isTriggerForPrinter = !trig.printerId || trig.printerId === printerId;
 
-      if (trig.enabled && isTriggerEnabledOnPrinter && checkLineMatchesPattern(line, trig.pattern)) {
+      if (trig.enabled && isTriggerForPrinter && checkLineMatchesPattern(line, trig.pattern)) {
         triggerSoundAlert(
           trig.soundType, 
           trig.soundValue, 
@@ -578,14 +603,15 @@ export default function App() {
       {/* Left Sidebar Navigation Menu */}
       <aside className="w-full md:w-64 bg-zinc-900 border-b md:border-b-0 md:border-r border-zinc-800 flex flex-col justify-between">
         <div>
-          {/* Brand */}
-          <div className="p-5 border-b border-zinc-800 flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white shadow-md shadow-emerald-950/40">
-              <ScreamingParrotIcon className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="font-sans font-bold text-base tracking-tight text-white leading-none">ParrotPrinter</h1>
-              <span className="text-[10px] text-emerald-400 font-bold tracking-wider uppercase mt-1 block">Monitor de Áudio</span>
+          {/* Brand Logo Only (top) */}
+          <div className="p-6 flex flex-col items-center justify-center border-b border-zinc-800">
+            <div className="w-[170px] h-[170px] bg-transparent border-none p-0 overflow-hidden flex items-center justify-center transition-transform hover:scale-105 duration-300">
+              <img 
+                src={logoUrl} 
+                alt="ParrotPrinter Logo" 
+                className="w-full h-full object-contain bg-transparent border-none"
+                referrerPolicy="no-referrer"
+              />
             </div>
           </div>
 
@@ -638,7 +664,14 @@ export default function App() {
         </div>
 
         {/* Sidebar Footer details */}
-        <div className="p-4 border-t border-zinc-850 bg-zinc-950/40 text-[11px] text-zinc-500 font-medium space-y-1 font-mono">
+        <div className="p-4 border-t border-zinc-850 bg-zinc-950/40 text-[11px] text-zinc-500 font-medium space-y-2.5 font-mono">
+          <div className="font-sans pb-2 border-b border-zinc-850">
+            <h1 className="font-bold text-sm tracking-tight text-white leading-none mb-1">ParrotPrinter</h1>
+            <span className="text-[9px] text-emerald-400 font-extrabold tracking-wider uppercase block bg-emerald-950/45 border border-emerald-900/30 px-1.5 py-0.5 rounded leading-none w-max">
+              DADOS &amp; SOM
+            </span>
+          </div>
+
           <div className="flex items-center justify-between">
             <span>Escuta WebSocket:</span>
             <span className="text-emerald-500 flex items-center gap-1">
@@ -659,7 +692,7 @@ export default function App() {
         <header className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-5">
           <div>
             <h2 className="font-sans font-bold text-2xl text-white tracking-tight">
-              {activeTab === 'dashboard' && 'Monitor de Impressão'}
+              {activeTab === 'dashboard' && 'ParrotPrinter'}
               {activeTab === 'triggers' && 'Controle de Sons e Gatilhos'}
               {activeTab === 'logs' && 'Histórico do Banco de Logs'}
             </h2>
@@ -671,7 +704,6 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-500 font-mono">UTC: {new Date().toISOString().substring(11, 19)}</span>
           </div>
         </header>
 
@@ -684,6 +716,7 @@ export default function App() {
             activePrinterId={activePrinterId}
             setActivePrinterId={setActivePrinterId}
             terminalLines={terminalLines}
+            globalTerminalLines={globalTerminalLines}
             onTogglePrinterEnabled={handleTogglePrinterEnabled}
             onAddPrinter={handleAddPrinter}
             onUpdatePrinter={handleUpdatePrinter}
@@ -699,6 +732,8 @@ export default function App() {
         {activeTab === 'triggers' && (
           <TriggerConfig
             triggers={triggers}
+            printers={printers}
+            onUpdatePrinter={handleUpdatePrinter}
             onAddTrigger={handleAddTrigger}
             onUpdateTrigger={handleUpdateTrigger}
             onDeleteTrigger={handleDeleteTrigger}

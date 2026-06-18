@@ -27,6 +27,7 @@ export interface EventTrigger {
   voiceLanguage: 'pt-BR' | 'en-US';
   enabled: boolean;
   description: string;
+  printerId?: string;
 }
 
 export interface LogEntry {
