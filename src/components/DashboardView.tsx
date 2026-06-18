@@ -10,7 +10,7 @@ import {
 } from './PrinterCard';
 import { 
   Activity, Radio, Terminal, Settings, Database, Plus, Play, 
-  HelpCircle, Volume2, ShieldAlert, BadgeInfo, Download, Upload, Eye
+  HelpCircle, Volume2, ShieldAlert, BadgeInfo, Download, Upload, Eye, Laptop
 } from 'lucide-react';
 import { exportDatabase, importDatabase } from '../utils/storage';
 
@@ -490,6 +490,22 @@ export function DashboardView({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Windows Startup Hook Option */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Laptop className="w-4 h-4 text-emerald-400" />
+              <h4 className="font-bold text-[11px] text-zinc-100 uppercase tracking-wider">Iniciar com o Windows (Oculto)</h4>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">
+              Configure o aplicativo para rodar automaticamente em segundo plano (invisível) sempre que o seu computador for ligado!
+            </p>
+            <div className="bg-zinc-950 border border-zinc-850/60 rounded-lg p-2.5 text-[10px] text-zinc-400 font-mono space-y-1 leading-relaxed">
+              <div>1. Na barra superior do menu, clique em <strong className="text-zinc-200">"Configurações &gt; Download ZIP"</strong> para obter os arquivos do app.</div>
+              <div>2. Dê dois cliques em <strong className="text-emerald-400 font-bold">iniciar-com-o-windows.bat</strong> na raiz da pasta.</div>
+              <div>3. Pressione a opção <strong className="text-emerald-400 font-bold">1</strong> e o atalho invisível será instalado com sucesso!</div>
+            </div>
           </div>
         </div>
 
