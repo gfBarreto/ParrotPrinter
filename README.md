@@ -35,7 +35,7 @@ Se você editou ou criou o projeto no AI Studio, você pode integrá-lo com seu 
 1. No seu computador local, abra o **Terminal** ou **Prompt de Comando (CMD)** na pasta onde deseja salvar o projeto.
 2. Copie e cole o comando substituindo os seus dados:
    ```bash
-   git clone [https://github.com/SEU-USUARIO/nome-do-seu-repositorio.git](https://github.com/gfBarreto/ParrotPrinter)
+   git clone https://github.com/gfBarreto/ParrotPrinter
    ```
 3. Acesse a pasta criada:
    ```bash
