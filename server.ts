@@ -172,12 +172,11 @@ function playLocalSystemAlert(trigger: EventTrigger, printerName: string, consol
 
         psScript = `
           try {
-            Add-Type -AssemblyName PresentationCore;
-            $player = New-Object System.Windows.Media.MediaPlayer;
-            $player.Open("${escapedPath}");
-            $player.Play();
-            Start-Sleep -Seconds 6;
-            $player.Close();
+            $player = New-Object -ComObject WMPlayer.OCX.7;
+            $player.URL = "${escapedPath}";
+            $player.controls.play();
+            $count = 0;
+            while ($player.playState -ne 1 -and $count -lt 35) { Start-Sleep -Milliseconds 200; $count++ }
           } catch {
             [System.Media.SystemSounds]::Asterisk.Play();
           } finally {
@@ -203,12 +202,11 @@ function playLocalSystemAlert(trigger: EventTrigger, printerName: string, consol
         $webClient = New-Object System.Net.WebClient;
         $webClient.DownloadFile("${cleanUrl}", "${escapedPath}");
         if (Test-Path "${escapedPath}") {
-          Add-Type -AssemblyName PresentationCore;
-          $player = New-Object System.Windows.Media.MediaPlayer;
-          $player.Open("${escapedPath}");
-          $player.Play();
-          Start-Sleep -Seconds 6;
-          $player.Close();
+          $player = New-Object -ComObject WMPlayer.OCX.7;
+          $player.URL = "${escapedPath}";
+          $player.controls.play();
+          $count = 0;
+          while ($player.playState -ne 1 -and $count -lt 35) { Start-Sleep -Milliseconds 200; $count++ }
         }
       } catch {
         [System.Media.SystemSounds]::Asterisk.Play();

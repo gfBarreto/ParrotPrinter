@@ -158,12 +158,19 @@ export function DashboardView({
             O seu navegador rodando este site na nuvem (<strong className="text-zinc-350">sob HTTPS</strong>) bloqueia por questões de segurança de <strong className="text-amber-400 font-medium">Conteúdo Misto</strong> as tentativas de conexões WebSocket inseguras (<strong className="text-zinc-350">ws://</strong>) com IPs privados da sua rede local (como seus Klipper <strong className="font-mono text-zinc-200">172.16.1.x</strong>).
           </p>
           <div className="bg-zinc-950/60 border border-zinc-900 rounded-lg p-3 text-[11px] space-y-2 font-sans font-medium">
-            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[10px]">COMO RODAR EM REDE LOCAL NO WINDOWS:</span>
+            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[10px]">COMO RODAR COMO EXECUTÁVEL / SEGUNDO PLANO NO WINDOWS:</span>
             <ol className="list-decimal list-inside space-y-1.5 text-zinc-450">
-              <li>Clique de exportação em <strong className="text-zinc-200">"Configurações" &gt; "Download ZIP"</strong> ou pegue os arquivos do app.</li>
+              <li>Clique para exportar em <strong className="text-zinc-200">"Configurações" &gt; "Download ZIP"</strong> ou pegue os arquivos do app.</li>
               <li>Certifique-se de ter o <strong className="text-zinc-200">Node.js</strong> instalado no seu notebook ou computador local.</li>
-              <li>Dê dois cliques no arquivo <strong className="text-emerald-400 font-mono">rodar-no-windows.bat</strong> na raiz do projeto. Ele fará todo o setup de dependências sozinho e abrirá no seu navegador local em <strong className="text-zinc-200 font-mono">http://localhost:3000</strong>.</li>
-              <li>Pronto! Servido localmente (sem HTTPS obrigatório), o navegador conectará perfeitamente e tocará os alertas!</li>
+              <li>
+                <span className="text-zinc-300 font-semibold">Modo Visível:</span> Dê dois cliques no arquivo <strong className="text-emerald-400 font-mono">rodar-no-windows.bat</strong>. Ele abrirá o navegador em <strong className="text-zinc-200 font-mono">http://localhost:3000</strong>.
+              </li>
+              <li>
+                <span className="text-emerald-400 font-semibold">Modo Servidor Silencioso (Sem Navegador):</span> Dê dois cliques em <strong className="text-amber-400 font-mono">rodar-oculto.vbs</strong>. O inicializador executará o monitor de impressoras em segundo plano sem abrir nenhuma tela preta (CMD). Você pode fechar o navegador e desligá-lo! Os sons de beeps, TTS e áudios tocarão no som do seu Windows de forma 100% autônoma.
+              </li>
+              <li>
+                <span className="text-rose-400 font-semibold">Para Parar o Monitor Oculto:</span> Basta dar dois cliques no arquivo <strong className="text-rose-400 font-mono">parar-sistema-oculto.bat</strong> para encerrar o serviço silencioso.
+              </li>
             </ol>
           </div>
           <p className="text-xs text-zinc-500 mt-2 text-right">

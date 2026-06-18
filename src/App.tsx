@@ -72,6 +72,39 @@ export default function App() {
       setActivePrinterId(listPrinters[0].id);
     }
 
+    // Bidirectional sync: Restore client config from server, or upload client config to empty server
+    fetch('/api/config')
+      .then(res => res.json())
+      .then(data => {
+        if (data) {
+          const serverPrinters = data.printers || [];
+          const serverTriggers = data.triggers || [];
+
+          // Case 1: Browser is completely empty, but server already has config (Restore from server file)
+          if (listPrinters.length === 0 && serverPrinters.length > 0) {
+            savePrinters(serverPrinters);
+            setPrinters(serverPrinters);
+            if (serverPrinters.length > 0) {
+              setActivePrinterId(serverPrinters[0].id);
+            }
+          }
+          if (listTriggers.length === 0 && serverTriggers.length > 0) {
+            saveTriggers(serverTriggers);
+            setTriggers(serverTriggers);
+          }
+
+          // Case 2: Browser has config, but server holds empty arrays (Push config to local server)
+          if ((listPrinters.length > 0 || listTriggers.length > 0) && serverPrinters.length === 0 && serverTriggers.length === 0) {
+            fetch('/api/config', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ printers: listPrinters, triggers: listTriggers })
+            }).catch(() => {});
+          }
+        }
+      })
+      .catch(err => console.debug('Bypassed background synchronizer (running in cloud context):', err));
+
     // Set listener to unblock sound instantly on human body clicks anywhere
     const unblockAudio = () => {
       setAudioBlockerActive(false);
