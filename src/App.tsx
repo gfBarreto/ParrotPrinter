@@ -18,6 +18,30 @@ import {
   Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders
 } from 'lucide-react';
 
+function checkLineMatchesPattern(line: string, pattern: string): boolean {
+  const cleanLine = line.toLowerCase().trim();
+  const cleanPattern = pattern.toLowerCase().trim();
+
+  // 1. Direct case-insensitive match
+  if (cleanLine.includes(cleanPattern)) {
+    return true;
+  }
+
+  // 2. Flexible match for common Klipper comment outputs.
+  // E.g., if pattern is "// print_started" and line is "// action:print_started" or just contains "print_started" as part of a gcode response.
+  if (cleanPattern.startsWith('//')) {
+    const keyword = cleanPattern.replace(/^\/\/\s*/, ''); // Extracts things like "print_started"
+    if (keyword && cleanLine.includes(keyword)) {
+      // Ensure the line has a comment identifier to confirm it's a printer status respond
+      if (cleanLine.includes('//') || cleanLine.includes('action:') || cleanLine.includes('echo:')) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export default function App() {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [triggers, setTriggers] = useState<EventTrigger[]>([]);
@@ -143,7 +167,7 @@ export default function App() {
               // Iterate through cached triggers (look up state triggers directly)
               setTriggers(latestTriggers => {
                 latestTriggers.forEach((trig) => {
-                  if (trig.enabled && line.includes(trig.pattern)) {
+                  if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
                     // Match found! Sound the alarm!
                     triggerSoundAlert(
                       trig.soundType, 
@@ -233,7 +257,7 @@ export default function App() {
 
     // Trigger check
     triggers.forEach((trig) => {
-      if (trig.enabled && line.includes(trig.pattern)) {
+      if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
         triggerSoundAlert(
           trig.soundType, 
           trig.soundValue, 

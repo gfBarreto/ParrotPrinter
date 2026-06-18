@@ -13,10 +13,16 @@ echo.
 
 node -v >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [ERRO] O Node.js nao foi encontrado no seu Windows!
-    echo Por favor, faca o download e instale o Node.js (versao LTS recomendada)
-    echo a partir de: https://nodejs.org
-    echo Depois de instalar, abra este arquivo novamente.
+    echo [ALERTA] O Node.js nao foi encontrado no seu sistema!
+    echo.
+    echo Para rodar o app local em sua rede, siga os passos abaixo:
+    echo 1. Baixe e instale o Node.js LTS em: https://nodejs.org
+    echo 2. Execute o instalador baixado clicando em "Next" ate o final.
+    echo 3. IMPORTANTE: Feche TODAS as suas janelas do Prompt de Comando (CMD) 
+    echo    e do Explorador de Arquivos para aplicar as variaveis de sistema.
+    echo 4. Abra esta pasta novamente e de dois cliques em "rodar-no-windows.bat".
+    echo.
+    echo Se voce acabou de instalar o Node.js, feche esta tela preta e abra-a novamente!
     echo.
     pause
     exit /b
