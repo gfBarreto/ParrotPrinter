@@ -1,7 +1,7 @@
 @echo off
-title Klipper Audio Hub - Atualizador Automático Windows
+title ParrotPrinter - Atualizador Automático Windows
 echo ==========================================================
-echo           KLIPPER AUDIO HUB - ATUALIZADOR AUTOMÁTICO
+echo             PARROT PRINTER - ATUALIZADOR AUTOMÁTICO
 echo ==========================================================
 echo.
 echo Este script ira baixar a versao mais recente diretamente do seu

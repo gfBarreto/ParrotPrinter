@@ -1,7 +1,7 @@
 @echo off
-title Klipper Audio Hub - Inicializador Windows
+title ParrotPrinter - Inicializador Windows
 echo ==========================================================
-echo           KLIPPER AUDIO HUB - INICIALIZADOR LOCAL
+echo               PARROT PRINTER - INICIALIZADOR LOCAL
 echo ==========================================================
 echo.
 echo Este script ira iniciar o monitor das suas impressoras 3D localmente.

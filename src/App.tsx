@@ -42,6 +42,44 @@ function checkLineMatchesPattern(line: string, pattern: string): boolean {
   return false;
 }
 
+function ScreamingParrotIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      {/* Head and body back curve of parrot */}
+      <path 
+        d="M16 18c2-1 2.5-3.5 2.5-6 0-3-2-5-5-5h-1c-.5 0-1 .2-1.5.5C9.5 6 9 4.5 7.5 4.5" 
+        className="text-emerald-300 fill-emerald-300/10"
+      />
+      {/* Plume/Crest feathers */}
+      <path d="M12.5 7C14 5.5 15.5 5 15.5 5" className="text-emerald-400" />
+      <path d="M11 7.5C12 6.5 13 6 13 6" className="text-emerald-400" strokeWidth="1.5" />
+      
+      {/* Eye pointing/screaming */}
+      <circle cx="14.5" cy="10" r="1.5" className="fill-white stroke-none" />
+      <circle cx="14.5" cy="10" r="0.6" className="fill-zinc-950 stroke-zinc-950" />
+
+      {/* Scream open beak */}
+      {/* Upper beak */}
+      <path d="M10.8 10L6.5 11.2h4.3z" fill="currentColor" className="text-amber-400 stroke-amber-400" />
+      {/* Lower beak */}
+      <path d="M10.8 12.5l-3.8-1.3h3.8z" fill="currentColor" className="text-amber-500 stroke-amber-500" />
+
+      {/* Scream Waves (propagating leftwards) */}
+      <path d="M4.5 9a3.5 3.5 0 0 0 0 4.5" className="text-emerald-400 animate-pulse" />
+      <path d="M2.5 7a6.5 6.5 0 0 0 0 8.5" className="text-emerald-500/80" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
 export default function App() {
   const [printers, setPrinters] = useState<Printer[]>([]);
   const [triggers, setTriggers] = useState<EventTrigger[]>([]);
@@ -105,7 +143,19 @@ export default function App() {
       })
       .catch(err => console.debug('Bypassed background synchronizer (running in cloud context):', err));
 
-    // Set listener to unblock sound instantly on human body clicks anywhere
+    // Check if AudioContext is already running (auto-allowed or previously approved in session)
+    try {
+      const AudioCtx2 = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx2) {
+        const testCtx = new AudioCtx2();
+        if (testCtx.state === 'running') {
+          setAudioBlockerActive(false);
+          testCtx.close();
+        }
+      }
+    } catch (e2) {}
+
+    // Set listener to unblock sound instantly on any human interaction (click, key, touch, etc.)
     const unblockAudio = () => {
       setAudioBlockerActive(false);
       // Resume browser's standard AudioContext
@@ -118,12 +168,23 @@ export default function App() {
       } catch (e) {
         console.warn('Silent context resume failed:', e);
       }
-      document.removeEventListener('click', unblockAudio);
+      removeListeners();
     };
+
+    const removeListeners = () => {
+      document.removeEventListener('click', unblockAudio);
+      document.removeEventListener('keydown', unblockAudio);
+      document.removeEventListener('touchstart', unblockAudio);
+      document.removeEventListener('mousedown', unblockAudio);
+    };
+
     document.addEventListener('click', unblockAudio);
+    document.addEventListener('keydown', unblockAudio);
+    document.addEventListener('touchstart', unblockAudio);
+    document.addEventListener('mousedown', unblockAudio);
 
     return () => {
-      document.removeEventListener('click', unblockAudio);
+      removeListeners();
     };
   }, []);
 
@@ -494,12 +555,12 @@ export default function App() {
         <div>
           {/* Brand */}
           <div className="p-5 border-b border-zinc-800 flex items-center gap-3">
-            <div className="p-2 bg-emerald-600 rounded-lg text-white shadow-md shadow-emerald-950/40">
-              <Bot className="w-5 h-5" />
+            <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white shadow-md shadow-emerald-950/40">
+              <ScreamingParrotIcon className="w-5 h-5 animate-bounce" />
             </div>
             <div>
-              <h1 className="font-sans font-bold text-sm tracking-tight text-white leading-none">Klipper Audio Hub</h1>
-              <span className="text-[10px] text-zinc-500 font-medium tracking-wide uppercase mt-1 block">Gerenciador Windows</span>
+              <h1 className="font-sans font-bold text-base tracking-tight text-white leading-none">ParrotPrinter</h1>
+              <span className="text-[10px] text-emerald-400 font-bold tracking-wider uppercase mt-1 block">Monitor de Áudio</span>
             </div>
           </div>
 

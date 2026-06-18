@@ -1,7 +1,7 @@
 @echo off
-title Klipper Audio Hub - Parar Sistema Oculto
+title ParrotPrinter - Parar Sistema Oculto
 echo ==========================================================
-echo       KLIPPER AUDIO HUB - PARAR SERVIDOR EM SEGUNDO PLANO
+echo         PARROT PRINTER - PARAR SERVIDOR EM SEGUNDO PLANO
 echo ==========================================================
 echo.
 echo Procurando e parando processos do Node.js de background...

@@ -137,47 +137,6 @@ export function DashboardView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Informação sobre Execução Local vs Nuvem */}
-      {isHelpOpen && (
-        <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 text-zinc-300">
-          <div className="flex items-start justify-between gap-4 mb-3">
-            <div className="flex items-center gap-2">
-              <BadgeInfo className="w-5 h-5 text-sky-400" />
-              <h3 className="font-bold text-sm text-zinc-200">
-                Como executar seu Monitor de Áudio em Segundo Plano no Windows
-              </h3>
-            </div>
-            <button
-              onClick={() => setIsHelpOpen(false)}
-              className="text-zinc-550 hover:text-zinc-350 text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-zinc-850 hover:bg-zinc-900 transition-colors cursor-pointer"
-            >
-              Ocultar Guia
-            </button>
-          </div>
-          <p className="text-xs text-zinc-400 leading-relaxed mb-3">
-            Você pode liberar o navegador e deixar o Monitor de Áudio Klipper rodando de forma 100% invisível em segundo plano no Windows. Toda a automação de beeps, voz (TTS) e áudios continuará tocando localmente:
-          </p>
-          <div className="bg-zinc-950/60 border border-zinc-900 rounded-lg p-3 text-[11px] space-y-2 font-sans font-medium">
-            <ol className="list-decimal list-inside space-y-1.5 text-zinc-450">
-              <li>Clique para exportar em <strong className="text-zinc-200">"Configurações" &gt; "Download ZIP"</strong> na barra superior para baixar os arquivos do app.</li>
-              <li>Certifique-se de ter o <strong className="text-zinc-200">Node.js</strong> instalado no seu computador local.</li>
-              <li>
-                <span className="text-zinc-300 font-semibold">Modo Visível comum:</span> Dê dois cliques no arquivo <strong className="text-emerald-400 font-mono">rodar-no-windows.bat</strong> para ligá-lo e abrir interface web.
-              </li>
-              <li>
-                <span className="text-sky-400 font-semibold">Modo Silencioso (Seguindo Plano):</span> Dê dois cliques em <strong className="text-sky-400 font-mono">rodar-oculto.vbs</strong>. O monitor iniciará sem abrir janelas de terminal (CMD) e continuará processando bips e áudios na sua máquina mesmo com o navegador fechado!
-              </li>
-              <li>
-                <span className="text-rose-400 font-semibold">Para Encerrar o Monitor Oculto:</span> Basta dar dois cliques no arquivo <strong className="text-rose-450 font-mono">parar-sistema-oculto.bat</strong> para finalizar todos os processos de background.
-              </li>
-            </ol>
-          </div>
-          <p className="text-xs text-zinc-500 mt-2 text-right">
-            💡 Você também pode testar os bips e vozes geradas diretamente no site usando a <strong>Bancada de Testes de G-code Simulada</strong> abaixo!
-          </p>
-        </div>
-      )}
-
       {/* Audio Activation Alert bar */}
       {audioBlockerActive && (
         <button
