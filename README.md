@@ -17,7 +17,7 @@ Para executar o ParrotPrinter no seu computador local, você precisa ter instala
 2. **Git**: Permite sincronizar, clonar do GitHub e fazer atualizações automáticas via navegador ou scripts em 1-clique.
 
 ### 🪄 Instalador Automático de Prerrequisitos (Windows)
-Nós incluímos o script **`instalar-requisitos.bat`** na raiz do projeto. Ele detecta se você possui o Node.JS e o Git. Caso falte algum, ele tentará instalá-los de forma totalmente automática usando o gerenciador de pacotes padrão do Windows (`winget`) e, em seguida, instalará todas as dependências locais via `npm install`.
+Foi incluído o script **`instalar-requisitos.bat`** na raiz do projeto. Ele detecta se você possui o Node.JS e o Git. Caso falte algum, ele tentará instalá-los de forma totalmente automática usando o gerenciador de pacotes padrão do Windows (`winget`) e, em seguida, instalará todas as dependências locais via `npm install`.
 
 1. Dê 2 cliques no arquivo **`instalar-requisitos.bat`** na raiz da pasta do seu projeto.
 2. Siga as instruções mostradas na tela. Se necessário instalar, reinicie o script após a conclusão para atualizar as variáveis do sistema.
@@ -47,6 +47,10 @@ Agora que a pasta está sincronizada com o GitHub:
 * Dê dois cliques em **`rodar-oculto`** para inicializar o painel e as conexões!
 
 ---
+### Passo 4: Nas macros a serem utilizadas no klipper, verificar se existe a linha abaixo como exemplo:
+
+**`RESPOND TYPE=command MSG="print_started" #envia mensagem de inicializar a impressão para o ParrotPrinter`**
+
 
 ## 🔄 Como Atualizar o ParrotPrinter
 
