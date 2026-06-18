@@ -100,6 +100,34 @@ export default function App() {
   // Anti-blocking state since modern browser requirements block audio alerts before first page click
   const [audioBlockerActive, setAudioBlockerActive] = useState(true);
 
+  // States for system update action
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+
+  const handleUpdateSystem = async () => {
+    setIsUpdating(true);
+    setUpdateStatus(null);
+    try {
+      const response = await fetch('/api/system/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        setUpdateStatus({ success: true, message: data.message });
+      } else {
+        setUpdateStatus({ success: false, message: data.message || 'Erro desconhecido ao tentar atualizar.' });
+      }
+    } catch (err) {
+      setUpdateStatus({
+        success: false,
+        message: 'Não foi possível se comunicar com o servidor. Verifique se o backend está executando no terminal por meio de "rodar-no-windows.bat" ou se o Git está devidamente configurado nesta pasta.'
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   // Connection refs to persist websockets and reconnect loops across re-renders
   const wsRef = useRef<Record<string, WebSocket>>({});
   const reconnectTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
@@ -678,14 +706,71 @@ export default function App() {
               <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Ativa
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span>Sons Habilitados:</span>
+          <div className="flex items-center justify-between font-sans">
+            <span className="font-mono">Sons Habilitados:</span>
             <span className={audioBlockerActive ? 'text-amber-500' : 'text-emerald-500'}>
               {audioBlockerActive ? 'Bloqueado 🔕' : 'Liberado 🔊'}
             </span>
           </div>
+
+          {/* Botão de Atualização com 1-Clique */}
+          <div className="pt-2 border-t border-zinc-850/60 bg-transparent font-sans">
+            <button
+              onClick={handleUpdateSystem}
+              disabled={isUpdating}
+              className={`w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-semibold select-none cursor-pointer border transition-all ${
+                isUpdating 
+                  ? 'bg-zinc-850 border-zinc-800 text-zinc-500 cursor-not-allowed' 
+                  : 'bg-emerald-600/10 hover:bg-emerald-600/25 border-emerald-500/20 hover:border-emerald-500/45 text-emerald-400 active:translate-y-[1px]'
+              }`}
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+              {isUpdating ? 'Atualizando...' : 'Atualizar Sistema'}
+            </button>
+          </div>
         </div>
       </aside>
+
+      {/* Modal de Status de Atualização */}
+      {updateStatus && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-start gap-3">
+              {updateStatus.success ? (
+                <div className="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg">
+                  <CheckSquare className="w-6 h-6" />
+                </div>
+              ) : (
+                <div className="p-2.5 bg-red-500/10 text-red-400 rounded-lg">
+                  <ShieldAlert className="w-6 h-6" />
+                </div>
+              )}
+              <div>
+                <h3 className="text-base font-bold text-white tracking-tight">
+                  {updateStatus.success ? 'Atualização Concluída!' : 'Falha na Atualização'}
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed">
+                  {updateStatus.message}
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => {
+                  setUpdateStatus(null);
+                  if (updateStatus.success) {
+                    window.location.reload();
+                  }
+                }}
+                className="px-4 py-2 bg-zinc-800 hover:bg-zinc-750 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+              >
+                {updateStatus.success ? 'Recarregar Painel' : 'Fechar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Panel */}
       <main className="flex-1 p-6 md:p-8 overflow-y-auto">

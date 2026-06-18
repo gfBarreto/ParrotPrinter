@@ -10,32 +10,61 @@ ParrotPrinter é um assistente de voz e central de alarmes de áudio em tempo re
 
 ---
 
-## 🛠️ Como Instalar e Executar o Projeto
+## 🛠️ Prerrequisitos do Sistema (Computador Local)
 
-Você pode rodar este projeto de forma automatizada no Windows (recomendado) ou de forma totalmente manual em qualquer sistema operacional (Linux, macOS, Windows).
+Para executar o ParrotPrinter no seu computador local, você precisa ter instalados:
+1. **Node.JS (Versão 18 ou superior)**: O motor de execução JavaScript e TypeScript que roda o painel local e coleta as websockets das impressoras.
+2. **Git**: Permite sincronizar, clonar do GitHub e fazer atualizações automáticas via navegador ou scripts em 1-clique.
 
-### 🏷️ Opção 1: Inicialização em 1-Clique (Recomendado para Windows)
+### 🪄 Instalador Automático de Prerrequisitos (Windows)
+Nós incluímos o script **`instalar-requisitos.bat`** na raiz do projeto. Ele detecta se você possui o Node.JS e o Git. Caso falte algum, ele tentará instalá-los de forma totalmente automática usando o gerenciador de pacotes padrão do Windows (`winget`) e, em seguida, instalará todas as dependências locais via `npm install`.
 
-O projeto vem com scripts automatizados para facilitar a sua vida no Windows. Ele automaticamente baixa e configura o NodeJS, instala as dependências e abre o link no seu navegador do sistema.
-
-1. Baixe o código fonte deste projeto (através da opção **Configurações > Download ZIP** no menu superior do AI Studio ou exportando para o GitHub).
-2. Extraia o arquivo ZIP em uma pasta do seu computador.
-3. Dê dois cliques no arquivo **`rodar-no-windows.bat`** na raiz do projeto.
-4. O terminal fará a verificação: se o `node_modules` não existir, ele rodará `npm install` automaticamente.
-5. Em segundos, o seu navegador padrão abrirá o endereço:  
-   👉 **`http://localhost:3000`**
+1. Dê 2 cliques no arquivo **`instalar-requisitos.bat`** na raiz da pasta do seu projeto.
+2. Siga as instruções mostradas na tela. Se necessário instalar, reinicie o script após a conclusão para atualizar as variáveis do sistema.
 
 ---
 
-### 💻 Opção 2: Instalação e Execução Manual (Multiplataforma)
+## 🚀 Como Sincronizar e Clonar do GitHub para o Computador
 
-Se você preferir executar via terminal no Linux, macOS ou Windows:
+Para que os botões de **Atualizar no navegador** e o script **`atualizar.bat`** funcionem, o projeto **precisa** ser baixado usando o Git (pasta `.git` ativa na raiz), e não por download direto do arquivo ZIP bruto.
 
-#### Prerrequisitos
-* Ter o **NodeJS** instalado (Versão 18 ou superior recomendada).
+### Passo 1: Publicar ou Exportar para o GitHub
+Se você editou ou criou o projeto no AI Studio, você pode integrá-lo com seu GitHub através do menu superior para criar um repositório remoto.
 
-#### Passos
-1. No terminal do seu computador, navegue até a pasta do projeto:
+### Passo 2: Clonar o Repositório Localmente
+1. No seu computador local, abra o **Terminal** ou **Prompt de Comando (CMD)** na pasta onde deseja salvar o projeto.
+2. Copie e cole o comando substituindo os seus dados:
+   ```bash
+   git clone https://github.com/SEU-USUARIO/nome-do-seu-repositorio.git
+   ```
+3. Acesse a pasta criada:
+   ```bash
+   cd nome-do-seu-repositorio
+   ```
+
+### Passo 3: Executar a Primeira Inicialização
+Agora que a pasta está sincronizada com o GitHub:
+* Dê dois cliques em **`rodar-no-windows.bat`** para inicializar o painel e as conexões!
+
+---
+
+## 🔄 Como Atualizar o ParrotPrinter
+
+Quando você ou a IA fizerem novas melhorias no projeto, você poderá sincronizá-las no seu computador local instantaneamente através de duas formas:
+
+### Opção A: Pelo Navegador (Botão na Interface)
+Na página principal do ParrotPrinter no navegador (em `http://localhost:3000`), clique no botão **"Atualizar Sistema"** localizado na aba de configurações. O servidor local fará um `git pull` automático e reiniciará o serviço para você!
+
+### Opção B: Pelo Script Local (`atualizar.bat`)
+1. Entre na pasta do projeto no Windows.
+2. Pressione duplo-clique no script **`atualizar.bat`**.
+3. Ele baixará as atualizações, reajustará arquivos locais e reconstruirá o código pronto para uso automaticamente.
+
+---
+
+## 💻 Como Instalar e Executar o Projeto Manualmente (Multiplataforma)
+
+Se você preferir executar via terminal no Linux, macOS ou Windows sem usar os scripts `.bat`:
    ```bash
    cd caminho/para/o/projeto/parrot-printer
    ```

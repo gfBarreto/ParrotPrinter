@@ -417,6 +417,66 @@ async function startServer() {
     res.json({ success: true, message: "Amostra simulada analisada e tocada no servidor se compativel!" });
   });
 
+  // API endpoint to trigger automatic system update directly from the web browser
+  app.post("/api/system/update", (req, res) => {
+    console.log("[Update API] Solicitação de atualização silenciosa disparada via navegador...");
+
+    if (!fs.existsSync(path.join(process.cwd(), ".git"))) {
+      return res.status(400).json({
+        success: false,
+        message: "Esta instalação não parece ser um clone do Git (falta a pasta .git). Peça para clonar via git para poder atualizar automaticamente pelo navegador com 1-clique."
+      });
+    }
+
+    // Run clean fetch & reset hard
+    exec("git fetch origin && git reset --hard origin/main", (err, stdout, stderr) => {
+      if (err) {
+        console.warn("[Update API] Falha no git reset hard, tentando git pull padrão...", err);
+        // Fallback to git pull origin main
+        exec("git pull origin main", (errPull, stdoutPull, stderrPull) => {
+          if (errPull) {
+            return res.status(500).json({
+              success: false,
+              message: "Falha ao puxar alterações do GitHub: " + errPull.message,
+              output: stderrPull || stdoutPull
+            });
+          }
+          runNpmAndBuild(res, "Git pull executado com sucesso.");
+        });
+      } else {
+        runNpmAndBuild(res, "Sincronização com o GitHub concluída.");
+      }
+    });
+
+    function runNpmAndBuild(responseObj: any, gitMsg: string) {
+      console.log("[Update API] Instalando novas dependências com npm install...");
+      exec("npm install", (errNpm, stdoutNpm, stderrNpm) => {
+        if (errNpm) {
+          return responseObj.status(500).json({
+            success: false,
+            message: `${gitMsg} Mas falhou ao rodar npm install para novas dependências: ${errNpm.message}`
+          });
+        }
+
+        console.log("[Update API] Recompilando o projeto com npm run build...");
+        exec("npm run build", (errBuild, stdoutBuild, stderrBuild) => {
+          if (errBuild) {
+            return responseObj.status(500).json({
+              success: false,
+              message: `${gitMsg} Dependências instaladas, mas falhou ao recriar build otimizado (npm run build): ${errBuild.message}`
+            });
+          }
+
+          console.log("[Update API] Sistema atualizado com SUCESSO!");
+          responseObj.json({
+            success: true,
+            message: "ParrotPrinter atualizado com sucesso! Reinicie o seu rodar-no-windows.bat ou recarregue a página se necessário."
+          });
+        });
+      });
+    }
+  });
+
   // Vite integration pattern
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
