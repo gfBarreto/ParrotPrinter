@@ -101,6 +101,17 @@ export default function App() {
   const wsRef = useRef<Record<string, WebSocket>>({});
   const reconnectTimeoutRef = useRef<Record<string, NodeJS.Timeout>>({});
 
+  const printersRef = useRef<Printer[]>([]);
+  const triggersRef = useRef<EventTrigger[]>([]);
+
+  useEffect(() => {
+    printersRef.current = printers;
+  }, [printers]);
+
+  useEffect(() => {
+    triggersRef.current = triggers;
+  }, [triggers]);
+
   // Fetch initial local DB seed
   useEffect(() => {
     const listPrinters = loadPrinters();
@@ -263,10 +274,17 @@ export default function App() {
 
             // Test line outputs against custom alert filters
             lines.forEach((line: string) => {
+              // Find latest printer setup
+              const currentPr = printersRef.current.find(p => p.id === id);
+              if (!currentPr) return;
+
               // Iterate through cached triggers (look up state triggers directly)
               setTriggers(latestTriggers => {
                 latestTriggers.forEach((trig) => {
-                  if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
+                  // Check if trigger is enabled on system and specifically for this printer
+                  const isTriggerEnabledOnPrinter = !currentPr.enabledTriggers || currentPr.enabledTriggers.includes(trig.id);
+
+                  if (trig.enabled && isTriggerEnabledOnPrinter && checkLineMatchesPattern(line, trig.pattern)) {
                     // Match found! Sound the alarm!
                     triggerSoundAlert(
                       trig.soundType, 
@@ -356,7 +374,9 @@ export default function App() {
 
     // Trigger check
     triggers.forEach((trig) => {
-      if (trig.enabled && checkLineMatchesPattern(line, trig.pattern)) {
+      const isTriggerEnabledOnPrinter = !printer.enabledTriggers || printer.enabledTriggers.includes(trig.id);
+
+      if (trig.enabled && isTriggerEnabledOnPrinter && checkLineMatchesPattern(line, trig.pattern)) {
         triggerSoundAlert(
           trig.soundType, 
           trig.soundValue, 

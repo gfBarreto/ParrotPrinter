@@ -60,6 +60,7 @@ export function DashboardView({
   const [newPrinterName, setNewPrinterName] = useState('');
   const [newPrinterIp, setNewPrinterIp] = useState('');
   const [newPrinterPort, setNewPrinterPort] = useState(7125);
+  const [selectedTriggerIds, setSelectedTriggerIds] = useState<string[]>([]);
 
   const [editingPrinterId, setEditingPrinterId] = useState<string | null>(null);
 
@@ -74,7 +75,8 @@ export function DashboardView({
           ...existing,
           name: newPrinterName,
           ip: newPrinterIp,
-          port: newPrinterPort
+          port: newPrinterPort,
+          enabledTriggers: selectedTriggerIds
         });
       }
       setEditingPrinterId(null);
@@ -83,13 +85,15 @@ export function DashboardView({
         name: newPrinterName,
         ip: newPrinterIp,
         port: newPrinterPort,
-        enabled: true
+        enabled: true,
+        enabledTriggers: selectedTriggerIds
       });
     }
 
     setNewPrinterName('');
     setNewPrinterIp('');
     setNewPrinterPort(7125);
+    setSelectedTriggerIds([]);
     setShowAddForm(false);
   };
 
@@ -98,6 +102,7 @@ export function DashboardView({
     setNewPrinterName(printer.name);
     setNewPrinterIp(printer.ip);
     setNewPrinterPort(printer.port);
+    setSelectedTriggerIds(printer.enabledTriggers || triggers.map(t => t.id));
     setShowAddForm(true);
   };
 
@@ -226,6 +231,7 @@ export function DashboardView({
                 setNewPrinterName('');
                 setNewPrinterIp('');
                 setNewPrinterPort(7125);
+                setSelectedTriggerIds(triggers.map(t => t.id));
                 setShowAddForm(!showAddForm);
               }}
               className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 hover:bg-zinc-750 text-xs font-semibold text-zinc-100 px-3 py-1.5 rounded-lg transition-colors"
@@ -236,38 +242,38 @@ export function DashboardView({
           </div>
 
           {showAddForm && (
-            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-4 shadow-lg animate-fadeIn">
-              <h3 className="font-bold text-sm text-zinc-100 mb-3">
+            <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 shadow-lg animate-fadeIn space-y-4">
+              <h3 className="font-bold text-sm text-zinc-100">
                 {editingPrinterId ? 'Alterar Impressora' : 'Nova Impressora Klipper'}
               </h3>
-              <form onSubmit={handleSubmitPrinter} className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                <div>
-                  <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Apelido (Nome)</label>
-                  <input
-                    id="printer-form-name"
-                    type="text"
-                    required
-                    placeholder="Ex: Goku"
-                    value={newPrinterName}
-                    onChange={(e) => setNewPrinterName(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-850 rounded text-sm text-zinc-200 focus:outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Endereço IP</label>
-                  <input
-                    id="printer-form-ip"
-                    type="text"
-                    required
-                    placeholder="Ex: 172.16.1.12"
-                    value={newPrinterIp}
-                    onChange={(e) => setNewPrinterIp(e.target.value)}
-                    className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-850 rounded text-sm text-zinc-200 focus:outline-none font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Porta API / Websocket</label>
-                  <div className="flex gap-2">
+              <form onSubmit={handleSubmitPrinter} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                  <div>
+                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Apelido (Nome)</label>
+                    <input
+                      id="printer-form-name"
+                      type="text"
+                      required
+                      placeholder="Ex: Goku"
+                      value={newPrinterName}
+                      onChange={(e) => setNewPrinterName(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-850 rounded text-sm text-zinc-200 focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Endereço IP</label>
+                    <input
+                      id="printer-form-ip"
+                      type="text"
+                      required
+                      placeholder="Ex: 172.16.1.12"
+                      value={newPrinterIp}
+                      onChange={(e) => setNewPrinterIp(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-850 rounded text-sm text-zinc-200 focus:outline-none font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Porta API / Websocket</label>
                     <input
                       id="printer-form-port"
                       type="number"
@@ -276,14 +282,85 @@ export function DashboardView({
                       onChange={(e) => setNewPrinterPort(parseInt(e.target.value) || 7125)}
                       className="w-full px-3 py-1.5 bg-zinc-900 border border-zinc-850 rounded text-sm text-zinc-200 focus:outline-none font-mono"
                     />
-                    <button
-                      id="btn-submit-printer"
-                      type="submit"
-                      className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white rounded transition-colors"
-                    >
-                      {editingPrinterId ? 'Salvar' : 'Conectar'}
-                    </button>
                   </div>
+                </div>
+
+                {/* Custom Trigger Selection Section */}
+                <div className="border-t border-zinc-900 pt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-[11px] text-zinc-400 font-bold uppercase tracking-wider">
+                      Gatilhos e Alertas de Áudio Ativos nesta Impressora
+                    </label>
+                    <span className="text-[10px] text-zinc-500 font-semibold">
+                      {selectedTriggerIds.length} de {triggers.length} selecionados
+                    </span>
+                  </div>
+
+                  {triggers.length === 0 ? (
+                    <p className="text-[11px] text-zinc-500 py-2 italic font-medium">
+                      Nenhum alerta/gatilho configurado no sistema. Use a aba "Configurar Sons" para criar novos modelos sonoros.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 bg-zinc-900/10 p-3 border border-zinc-900 rounded-lg max-h-48 overflow-y-auto">
+                      {triggers.map((trigger) => {
+                        const isChecked = selectedTriggerIds.includes(trigger.id);
+                        return (
+                          <label
+                            key={trigger.id}
+                            className={`flex items-start gap-2 p-2.5 rounded-lg border text-left cursor-pointer select-none transition-all duration-200 ${
+                              isChecked
+                                ? 'bg-emerald-950/20 border-emerald-900/40 text-emerald-300'
+                                : 'bg-zinc-950/20 border-zinc-900 text-zinc-500 hover:border-zinc-800'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setSelectedTriggerIds([...selectedTriggerIds, trigger.id]);
+                                } else {
+                                  setSelectedTriggerIds(selectedTriggerIds.filter(id => id !== trigger.id));
+                                }
+                              }}
+                              className="mt-0.5 rounded border-zinc-700 bg-zinc-800 text-emerald-600 focus:ring-emerald-500/30 text-xs w-3.5 h-3.5"
+                            />
+                            <div className="space-y-0.5">
+                              <div className="text-xs font-bold leading-tight">{trigger.name}</div>
+                              <div className="text-[9px] text-zinc-500 leading-none truncate max-w-[150px]">
+                                Padrão: <span className="font-mono bg-zinc-950 px-1 py-0.5 rounded text-[9px] text-zinc-450">{trigger.pattern}</span>
+                              </div>
+                            </div>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Form Buttons */}
+                <div className="flex justify-end gap-2 pt-2 border-t border-zinc-900">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setNewPrinterName('');
+                      setNewPrinterIp('');
+                      setNewPrinterPort(7125);
+                      setSelectedTriggerIds([]);
+                      setShowAddForm(false);
+                      setEditingPrinterId(null);
+                    }}
+                    className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-850 text-zinc-400 font-bold text-xs rounded transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    id="btn-submit-printer"
+                    type="submit"
+                    className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white rounded transition-colors"
+                  >
+                    {editingPrinterId ? 'Salvar' : 'Conectar'}
+                  </button>
                 </div>
               </form>
             </div>
@@ -299,6 +376,7 @@ export function DashboardView({
                 onEdit={startEditPrinter}
                 onDelete={onDeletePrinter}
                 onManualConnect={onManualConnect}
+                allTriggersCount={triggers.length}
               />
             ))}
 
@@ -308,7 +386,10 @@ export function DashboardView({
                 <p className="text-zinc-500 text-sm font-sans mb-3">Nenhuma impressora configurada.</p>
                 <button
                   id="btn-add-initial-printer"
-                  onClick={() => setShowAddForm(true)}
+                  onClick={() => {
+                    setSelectedTriggerIds(triggers.map(t => t.id));
+                    setShowAddForm(true);
+                  }}
                   className="px-4 py-2 bg-zinc-800 text-zinc-200 text-xs font-semibold rounded-lg hover:bg-zinc-750 transition-colors"
                 >
                   Adicionar Primeira Impressora

@@ -13,6 +13,7 @@ export interface Printer {
   errorDetails?: string;
   lastSeen?: string;
   bytesReceived?: number;
+  enabledTriggers?: string[];
 }
 
 export type SoundType = 'synth' | 'speech' | 'upload' | 'url';

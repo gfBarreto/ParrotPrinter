@@ -13,6 +13,7 @@ interface PrinterCardProps {
   onEdit: (printer: Printer) => void;
   onDelete: (id: string) => void;
   onManualConnect: (id: string) => void;
+  allTriggersCount: number;
   key?: string | number;
 }
 
@@ -21,7 +22,8 @@ export function PrinterCard({
   onToggleEnabled,
   onEdit,
   onDelete,
-  onManualConnect
+  onManualConnect,
+  allTriggersCount
 }: PrinterCardProps) {
   const getStatusColor = (status: Printer['connectionStatus']) => {
     switch (status) {
@@ -52,6 +54,8 @@ export function PrinterCard({
   const formattedTime = printer.lastSeen 
     ? new Date(printer.lastSeen).toLocaleTimeString() 
     : 'Nunca';
+
+  const activeTriggersCount = printer.enabledTriggers ? printer.enabledTriggers.length : allTriggersCount;
 
   return (
     <div 
@@ -142,7 +146,7 @@ export function PrinterCard({
       </div>
 
       {/* Metrics / Details */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-2 gap-3 mb-3">
         <div className="bg-zinc-950/40 p-2.5 rounded border border-zinc-850/60">
           <div className="text-[10px] text-zinc-500 font-sans uppercase font-bold">Última Resposta</div>
           <div className="font-mono text-xs text-zinc-300 mt-0.5">{formattedTime}</div>
@@ -153,6 +157,14 @@ export function PrinterCard({
             {printer.bytesReceived ? `${(printer.bytesReceived / 1024).toFixed(1)} KB` : '0 KB'}
           </div>
         </div>
+      </div>
+
+      {/* Triggers indicator */}
+      <div className="bg-zinc-950/20 px-3 py-2 rounded-lg border border-zinc-850/40 text-xs text-zinc-400 font-sans flex items-center justify-between mb-4">
+        <span className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider">Alertas de Áudio</span>
+        <span className="font-bold text-xs text-emerald-400 bg-emerald-950/30 px-2 py-0.5 border border-emerald-900/30 rounded-md">
+          {activeTriggersCount} de {allTriggersCount} ativos
+        </span>
       </div>
 
       {/* Error detail notification if present */}
