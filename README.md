@@ -1,5 +1,9 @@
 # 🦜 ParrotPrinter
 
+<p align="center">
+  <img src="src/assets/images/regenerated_image_1781812433016.png" alt="ParrotPrinter Logo" width="220" />
+</p>
+
 **Monitoramento por Voz e Alarmes de Áudio para Impressoras 3D (Klipper / Moonraker)**
 
 ParrotPrinter é um assistente de voz e central de alarmes de áudio em tempo real para as suas impressoras 3D equipadas com Klipper/Moonraker. Ele detecta os códigos impressos ou mensagens de erro no console G-code e pronuncia de forma falada o nome da impressora correspondente e o evento atual ou dispara alarmes sonoros personalizados.
