@@ -54,28 +54,33 @@ function ScreamingParrotIcon({ className = "w-5 h-5" }: { className?: string }) 
       strokeLinejoin="round"
       className={className}
     >
-      {/* Head and body back curve of parrot */}
+      {/* Head and back of the parrot */}
       <path 
-        d="M16 18c2-1 2.5-3.5 2.5-6 0-3-2-5-5-5h-1c-.5 0-1 .2-1.5.5C9.5 6 9 4.5 7.5 4.5" 
-        className="text-emerald-300 fill-emerald-300/10"
+        d="M17 19c1.5-1 2-3 2-5.5 0-3-1.5-5.5-4-5.5h-1c-.5 0-1 .2-1.5.5C11.5 7.5 11 6 9.5 6" 
+        className="text-emerald-400 fill-emerald-400/10"
       />
-      {/* Plume/Crest feathers */}
-      <path d="M12.5 7C14 5.5 15.5 5 15.5 5" className="text-emerald-400" />
-      <path d="M11 7.5C12 6.5 13 6 13 6" className="text-emerald-400" strokeWidth="1.5" />
+      {/* Plume of crest feathers */}
+      <path d="M14 8c1-1.5 2.5-2 2.5-2" className="text-emerald-300" strokeWidth="1.5" />
+      <path d="M12.5 8.5C13.5 7.5 14.5 7 14.5 7" className="text-emerald-300" strokeWidth="1" />
       
-      {/* Eye pointing/screaming */}
-      <circle cx="14.5" cy="10" r="1.5" className="fill-white stroke-none" />
-      <circle cx="14.5" cy="10" r="0.6" className="fill-zinc-950 stroke-zinc-950" />
+      {/* Eyeball of the parrot */}
+      <circle cx="15.5" cy="11.5" r="1.2" className="fill-white stroke-none" />
+      <circle cx="15.5" cy="11.5" r="0.5" className="fill-zinc-950 stroke-zinc-950" />
 
-      {/* Scream open beak */}
-      {/* Upper beak */}
-      <path d="M10.8 10L6.5 11.2h4.3z" fill="currentColor" className="text-amber-400 stroke-amber-400" />
-      {/* Lower beak */}
-      <path d="M10.8 12.5l-3.8-1.3h3.8z" fill="currentColor" className="text-amber-500 stroke-amber-500" />
+      {/* Parrot's Beak pointing to megaphone */}
+      <path d="M12.5 11.5c-1-0.2-2.2 0.3-2.8 1l2.5 1.5c0.5-1.1 0.5-2.2 0.3-2.5z" fill="currentColor" className="text-amber-400 stroke-amber-400" />
 
-      {/* Scream Waves (propagating leftwards) */}
-      <path d="M4.5 9a3.5 3.5 0 0 0 0 4.5" className="text-emerald-400 animate-pulse" />
-      <path d="M2.5 7a6.5 6.5 0 0 0 0 8.5" className="text-emerald-500/80" strokeWidth="1.5" />
+      {/* Megaphone (held by the parrot at the beak/mouth area) */}
+      {/* Cone of the Megaphone pointing forward/left */}
+      <path d="M9.5 12.8 L5 10.5 L4.5 15.5 Z" fill="currentColor" className="text-zinc-300 stroke-zinc-400" strokeWidth="1" />
+      {/* Megaphone bells/rim */}
+      <ellipse cx="4.5" cy="13" rx="1.2" ry="2.5" fill="currentColor" className="text-rose-500 stroke-rose-450" strokeWidth="1" />
+      {/* Handle */}
+      <path d="M7.5 13.5 L7.8 16 L8.5 15.8" className="text-zinc-450 stroke-zinc-450" strokeWidth="1.5" />
+
+      {/* Sound waves coming out of megaphone (completely static, no animation) */}
+      <path d="M2.5 11a2.5 2.5 0 0 0 0 4" className="text-emerald-400" strokeWidth="1.5" />
+      <path d="M1 9a5 5 0 0 0 0 8" className="text-emerald-500/80" strokeWidth="1" />
     </svg>
   );
 }
@@ -556,7 +561,7 @@ export default function App() {
           {/* Brand */}
           <div className="p-5 border-b border-zinc-800 flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white shadow-md shadow-emerald-950/40">
-              <ScreamingParrotIcon className="w-5 h-5 animate-bounce" />
+              <ScreamingParrotIcon className="w-5 h-5" />
             </div>
             <div>
               <h1 className="font-sans font-bold text-base tracking-tight text-white leading-none">ParrotPrinter</h1>

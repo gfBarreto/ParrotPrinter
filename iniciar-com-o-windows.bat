@@ -41,7 +41,7 @@ if not exist "%VBS_FILE%" (
 
 :: Criar atalho na pasta de Inicializar do Windows
 echo Criando atalho em segundo plano na pasta Startup do Windows...
-powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\ParrotPrinter.lnk'); $Shortcut.TargetPath = '%VBS_FILE%'; $Shortcut.WorkingDirectory = '%~dp0'; $Shortcut.Save()"
+powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup\ParrotPrinter.lnk'); $Shortcut.TargetPath = '%VBS_FILE%'; $Shortcut.WorkingDirectory = '%~dp0'; $Shortcut.Save()"
 
 if %errorlevel% equ 0 (
     echo.
