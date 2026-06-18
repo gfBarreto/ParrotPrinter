@@ -32,23 +32,39 @@ if not exist .git (
     exit /b
 )
 
-echo [1/3] Preparando pasta e baixando novidades do GitHub (git pull)...
+echo [1/3] Preparando pasta e sincronizando com o GitHub...
 echo.
 
-:: Remove package-lock.json para evitar o erro de arquivos nao rastreados (ele sera recriado pelo npm install)
+:: Para evitar conflitos de "untracked files would be overwritten" com arquivos criados localmente
+:: mas que ja estao no repositorio remoto (como server.ts, scripts vbs/bat, etc.)
 if exist package-lock.json (
-    echo [Info] Removendo arquivo package-lock.json temporario para evitar conflitos...
+    echo [Info] Removendo arquivo package-lock.json temporario...
     del /f /q package-lock.json
 )
+if exist parar-sistema-oculto.bat (
+    echo [Info] Removendo parar-sistema-oculto.bat local para receber versao limpa do Git...
+    del /f /q parar-sistema-oculto.bat
+)
+if exist rodar-oculto.vbs (
+    echo [Info] Removendo rodar-oculto.vbs local para receber versao limpa do Git...
+    del /f /q rodar-oculto.vbs
+)
+if exist server.ts (
+    echo [Info] Removendo server.ts local para receber versao limpa do Git...
+    del /f /q server.ts
+)
 
-call git pull origin main
+echo Buscando alteracoes no GitHub (git fetch)...
+call git fetch origin
+
+echo Forcando atualizacao completa (git reset --hard origin/main)...
+call git reset --hard origin/main
 if %errorlevel% neq 0 (
     echo.
-    echo [ALERTA] Diferenca ou conflito detectado no Git. 
-    echo Tentando resetar arquivos rastreados modificados localmente para garantir a atualizacao...
-    call git reset --hard HEAD
+    echo [ALERTA] Falha ao resetar repositorio. Tentando git pull padrao...
     call git pull origin main
 )
+
 
 echo.
 echo [2/3] Atualizando pacotes de dependencia (npm install)...

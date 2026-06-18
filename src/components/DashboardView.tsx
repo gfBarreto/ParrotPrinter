@@ -139,42 +139,41 @@ export function DashboardView({
     <div className="space-y-6 font-sans">
       {/* Informação sobre Execução Local vs Nuvem */}
       {isHelpOpen && (
-        <div className="bg-amber-950/40 border border-amber-900/60 rounded-xl p-4 text-zinc-300">
+        <div className="bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 text-zinc-300">
           <div className="flex items-start justify-between gap-4 mb-3">
             <div className="flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-amber-500 animate-pulse" />
-              <h3 className="font-bold text-sm text-amber-400">
-                Por que ocorre o erro de conexão "The operation is insecure"?
+              <BadgeInfo className="w-5 h-5 text-sky-400" />
+              <h3 className="font-bold text-sm text-zinc-200">
+                Como executar seu Monitor de Áudio em Segundo Plano no Windows
               </h3>
             </div>
             <button
               onClick={() => setIsHelpOpen(false)}
-              className="text-zinc-550 hover:text-zinc-350 text-xs font-semibold px-2 py-0.5 rounded border border-zinc-850 hover:bg-zinc-900 transition-colors cursor-pointer"
+              className="text-zinc-550 hover:text-zinc-350 text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-zinc-850 hover:bg-zinc-900 transition-colors cursor-pointer"
             >
-              Ocultar Aviso
+              Ocultar Guia
             </button>
           </div>
-          <p className="text-xs text-zinc-350 leading-relaxed mb-3">
-            O seu navegador rodando este site na nuvem (<strong className="text-zinc-350">sob HTTPS</strong>) bloqueia por questões de segurança de <strong className="text-amber-400 font-medium">Conteúdo Misto</strong> as tentativas de conexões WebSocket inseguras (<strong className="text-zinc-350">ws://</strong>) com IPs privados da sua rede local (como seus Klipper <strong className="font-mono text-zinc-200">172.16.1.x</strong>).
+          <p className="text-xs text-zinc-400 leading-relaxed mb-3">
+            Você pode liberar o navegador e deixar o Monitor de Áudio Klipper rodando de forma 100% invisível em segundo plano no Windows. Toda a automação de beeps, voz (TTS) e áudios continuará tocando localmente:
           </p>
           <div className="bg-zinc-950/60 border border-zinc-900 rounded-lg p-3 text-[11px] space-y-2 font-sans font-medium">
-            <span className="text-zinc-400 font-bold uppercase tracking-wider block text-[10px]">COMO RODAR COMO EXECUTÁVEL / SEGUNDO PLANO NO WINDOWS:</span>
             <ol className="list-decimal list-inside space-y-1.5 text-zinc-450">
-              <li>Clique para exportar em <strong className="text-zinc-200">"Configurações" &gt; "Download ZIP"</strong> ou pegue os arquivos do app.</li>
-              <li>Certifique-se de ter o <strong className="text-zinc-200">Node.js</strong> instalado no seu notebook ou computador local.</li>
+              <li>Clique para exportar em <strong className="text-zinc-200">"Configurações" &gt; "Download ZIP"</strong> na barra superior para baixar os arquivos do app.</li>
+              <li>Certifique-se de ter o <strong className="text-zinc-200">Node.js</strong> instalado no seu computador local.</li>
               <li>
-                <span className="text-zinc-300 font-semibold">Modo Visível:</span> Dê dois cliques no arquivo <strong className="text-emerald-400 font-mono">rodar-no-windows.bat</strong>. Ele abrirá o navegador em <strong className="text-zinc-200 font-mono">http://localhost:3000</strong>.
+                <span className="text-zinc-300 font-semibold">Modo Visível comum:</span> Dê dois cliques no arquivo <strong className="text-emerald-400 font-mono">rodar-no-windows.bat</strong> para ligá-lo e abrir interface web.
               </li>
               <li>
-                <span className="text-emerald-400 font-semibold">Modo Servidor Silencioso (Sem Navegador):</span> Dê dois cliques em <strong className="text-amber-400 font-mono">rodar-oculto.vbs</strong>. O inicializador executará o monitor de impressoras em segundo plano sem abrir nenhuma tela preta (CMD). Você pode fechar o navegador e desligá-lo! Os sons de beeps, TTS e áudios tocarão no som do seu Windows de forma 100% autônoma.
+                <span className="text-sky-400 font-semibold">Modo Silencioso (Seguindo Plano):</span> Dê dois cliques em <strong className="text-sky-400 font-mono">rodar-oculto.vbs</strong>. O monitor iniciará sem abrir janelas de terminal (CMD) e continuará processando bips e áudios na sua máquina mesmo com o navegador fechado!
               </li>
               <li>
-                <span className="text-rose-400 font-semibold">Para Parar o Monitor Oculto:</span> Basta dar dois cliques no arquivo <strong className="text-rose-400 font-mono">parar-sistema-oculto.bat</strong> para encerrar o serviço silencioso.
+                <span className="text-rose-400 font-semibold">Para Encerrar o Monitor Oculto:</span> Basta dar dois cliques no arquivo <strong className="text-rose-450 font-mono">parar-sistema-oculto.bat</strong> para finalizar todos os processos de background.
               </li>
             </ol>
           </div>
           <p className="text-xs text-zinc-500 mt-2 text-right">
-            💡 Utilize a <strong>Bancada de Testes de G-code Simulada</strong> abaixo para ouvir os sons funcionando no seu navegador agora mesmo!
+            💡 Você também pode testar os bips e vozes geradas diretamente no site usando a <strong>Bancada de Testes de G-code Simulada</strong> abaixo!
           </p>
         </div>
       )}
