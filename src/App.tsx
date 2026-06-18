@@ -279,7 +279,30 @@ export default function App() {
         setLogs(prev => [nLog, ...prev]);
       }
     });
+
+    // Notify the background Node.js server to run simulation as well (playing powershell sounds locally)
+    fetch('/api/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ printerId, line })
+    }).catch(() => {});
   };
+
+  // Debounced configurations sync to native local Node.js background monitor
+  useEffect(() => {
+    if (printers.length > 0 || triggers.length > 0) {
+      const timeoutId = setTimeout(() => {
+        fetch('/api/config', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ printers, triggers })
+        }).catch(err => console.debug('Not running locally in background, bypassed back-end synch:', err));
+      }, 800);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [printers, triggers]);
 
   // Connection manager trigger when table printers array changes
   useEffect(() => {
