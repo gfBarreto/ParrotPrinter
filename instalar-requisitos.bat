@@ -12,67 +12,73 @@ echo.
 :: 1. Verifica Node.js
 echo [1/3] Verificando se o NodeJS esta instalado...
 node --version >nul 2>&1
-if %errorlevel% neq 0 (
+if %errorlevel% equ 0 goto node_installed
+
+echo.
+echo [AVISO] NodeJS nao encontrado!
+echo Tentando instalar o NodeJS automaticamente via Windows Package Manager (winget)...
+winget --version >nul 2>&1
+if %errorlevel% neq 0 goto node_manual_download
+
+echo Comando winget detectado! Instalando NodeJS LTS...
+winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
+if %errorlevel% equ 0 (
     echo.
-    echo [AVISO] NodeJS nao encontrado!
-    echo Tentando instalar o NodeJS automaticamente via Windows Package Manager (winget)...
-    winget --version >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo Comando winget detectado! Instalando NodeJS LTS...
-        winget install OpenJS.NodeJS.LTS --silent --accept-package-agreements --accept-source-agreements
-        if %errorlevel% equ 0 (
-            echo.
-            echo [SUCESSO] NodeJS instalado! Por favor, reinicie este script para aplicar as novas variaveis de ambiente.
-            pause
-            exit /b
-        )
-    )
-    echo.
-    echo Nao foi possivel instalar automaticamente.
-    echo Por favor, faca o download manual e instale atraves do link:
-    echo --^> https://nodejs.org/ (Selecione a versao LTS recomendada)
-    echo.
-    set /p "dummy=[Pressione ENTER para abrir a pagina do NodeJS no seu navegador...]"
-    start https://nodejs.org/
+    echo [SUCESSO] NodeJS instalado! Por favor, feche e abra novamente este script para aplicar as novas variaveis de ambiente.
     pause
     exit /b
-) else (
-    echo NodeJS ja esta instalado. Versao:
-    node --version
 )
+
+:node_manual_download
+echo.
+echo Nao foi possivel instalar automaticamente.
+echo Por favor, faca o download manual e instale atraves do link:
+echo --^> https://nodejs.org/
+echo.
+set /p "dummy=[Pressione ENTER para abrir a pagina do NodeJS no seu navegador...]"
+start https://nodejs.org/
+pause
+exit /b
+
+:node_installed
+echo NodeJS ja esta instalado. Versao:
+node --version
 echo.
 
 :: 2. Verifica Git
 echo [2/3] Verificando se o Git esta instalado...
 git --version >nul 2>&1
-if %errorlevel% neq 0 (
+if %errorlevel% equ 0 goto git_installed
+
+echo.
+echo [AVISO] Git nao encontrado!
+echo Tentando instalar o Git automaticamente via Windows Package Manager (winget)...
+winget --version >nul 2>&1
+if %errorlevel% neq 0 goto git_manual_download
+
+echo Comando winget detectado! Instalando Git...
+winget install Git.Git --silent --accept-package-agreements --accept-source-agreements
+if %errorlevel% equ 0 (
     echo.
-    echo [AVISO] Git nao encontrado!
-    echo Tentando instalar o Git automaticamente via Windows Package Manager (winget)...
-    winget --version >nul 2>&1
-    if %errorlevel% equ 0 (
-        echo Comando winget detectado! Instalando Git...
-        winget install Git.Git --silent --accept-package-agreements --accept-source-agreements
-        if %errorlevel% equ 0 (
-            echo.
-            echo [SUCESSO] Git instalado! Por favor, reinicie este script para aplicar as novas variaveis de ambiente.
-            pause
-            exit /b
-        )
-    )
-    echo.
-    echo Nao foi possivel instalar automaticamente.
-    echo Por favor, faca o download manual e instale atraves do link:
-    echo --^> https://git-scm.com/download/win
-    echo.
-    set /p "dummy=[Pressione ENTER para abrir a pagina do Git no seu navegador...]"
-    start https://git-scm.com/download/win
+    echo [SUCESSO] Git instalado! Por favor, feche e abra novamente este script para aplicar as novas variaveis de ambiente.
     pause
     exit /b
-) else (
-    echo Git ja esta instalado. Versao:
-    git --version
 )
+
+:git_manual_download
+echo.
+echo Nao foi possivel instalar automaticamente.
+echo Por favor, faca o download manual e instale atraves do link:
+echo --^> https://git-scm.com/download/win
+echo.
+set /p "dummy=[Pressione ENTER para abrir a pagina do Git no seu navegador...]"
+start https://git-scm.com/download/win
+pause
+exit /b
+
+:git_installed
+echo Git ja esta instalado. Versao:
+git --version
 echo.
 
 :: 3. Instalar dependencias
