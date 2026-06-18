@@ -32,14 +32,22 @@ if not exist .git (
     exit /b
 )
 
-echo [1/3] Baixando novidades do GitHub (git pull)...
+echo [1/3] Preparando pasta e baixando novidades do GitHub (git pull)...
 echo.
+
+:: Remove package-lock.json para evitar o erro de arquivos nao rastreados (ele sera recriado pelo npm install)
+if exist package-lock.json (
+    echo [Info] Removendo arquivo package-lock.json temporario para evitar conflitos...
+    del /f /q package-lock.json
+)
+
 call git pull origin main
 if %errorlevel% neq 0 (
     echo.
-    echo [ALERTA] Tem alteracoes locais nao salvas ou falha na conexao.
-    echo Tentando forcar o pull para garantir sincronia...
-    call git pull
+    echo [ALERTA] Diferenca ou conflito detectado no Git. 
+    echo Tentando resetar arquivos rastreados modificados localmente para garantir a atualizacao...
+    call git reset --hard HEAD
+    call git pull origin main
 )
 
 echo.
