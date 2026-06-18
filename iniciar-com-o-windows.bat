@@ -48,17 +48,17 @@ if %errorlevel% equ 0 (
     echo ==========================================================
     echo SUCESSO! O ParrotPrinter agora iniciara com o Windows!
     echo.
-    echo O que acontecerá agora?
-    echo - Toda vez que ligar o Windows, o monitor de áudio iniciará
+    echo O que acontecera agora?
+    echo - Toda vez que ligar o Windows, o monitor de audio iniciara
     echo   silenciosamente em segundo plano.
-    echo   (Bips, avisos de voz TTS, etc. funcionarão normalmente)
+    echo - Avisos de voz, bips e sons funcionarao localmente de forma autonoma.
     echo.
     echo IMPORTANTE: Se voce mover ou renomear esta pasta "ParrotPrinter",
     echo voce precisara executar este script [Opcao 1] novamente
     echo para atualizar o atalho da inicializacao!
     echo ==========================================================
 ) else (
-    echo [ERRO] Falha ao criar o atalho automático usando PowerShell.
+    echo [ERRO] Falha ao criar o atalho automatico usando PowerShell.
 )
 echo.
 pause
