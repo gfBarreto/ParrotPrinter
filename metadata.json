@@ -1,0 +1,6 @@
+{
+  "name": "Klipper Monitor & Audio Alerts",
+  "description": "A dashboard to manage, monitor, and configure audio alerts for Klipper 3D Printers via local WebSocket events.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
