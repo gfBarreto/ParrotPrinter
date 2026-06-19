@@ -466,47 +466,91 @@ async function startServer() {
   });
 
   // API endpoint to trigger automatic system update directly from the web browser
-  app.post("/api/system/update", (req, res) => {
+  app.post("/api/system/update", async (req, res) => {
     console.log("[Update API] Solicitação de atualização silenciosa disparada via navegador...");
 
-    // DESATIVADO: Comentado para permitir que o botão funcione sempre sem bloqueio manual
-    /*
-    if (!fs.existsSync(path.join(process.cwd(), ".git"))) {
-      return res.status(400).json({
-        success: false,
-        message: "Esta instalação não parece ser um clone do Git (falta a pasta .git). Peça para clonar via git para poder atualizar automaticamente pelo navegador com 1-clique."
-      });
-    }
-    */
+    const hasGitDir = fs.existsSync(path.join(process.cwd(), ".git"));
 
-    // Run clean fetch & reset hard
-    exec("git fetch origin && git reset --hard origin/main", (err, stdout, stderr) => {
-      if (err) {
-        console.warn("[Update API] Falha no git reset hard, tentando git pull padrão...", err);
-        // Fallback to git pull origin main
-        exec("git pull origin main", (errPull, stdoutPull, stderrPull) => {
-          if (errPull) {
-            return res.status(500).json({
+    if (hasGitDir) {
+      console.log("[Update API] Pasta .git encontrada. Tentando atualizar via Git CLI...");
+      exec("git fetch origin && git reset --hard origin/main", (err, stdout, stderr) => {
+        if (err) {
+          console.warn("[Update API] Falha no git reset hard, tentando git pull padrão...", err);
+          exec("git pull origin main", (errPull, stdoutPull, stderrPull) => {
+            if (errPull) {
+              console.warn("[Update API] Falha no git pull também. Tentando fallback via download de ZIP...", errPull.message);
+              runZipUpdateFallback(res, "Git CLI falhou ao atualizar.");
+            } else {
+              runNpmAndBuild(res, "Sincronização via Git (pull) concluída com sucesso.");
+            }
+          });
+        } else {
+          runNpmAndBuild(res, "Sincronização via Git (fetch & reset) concluída.");
+        }
+      });
+    } else {
+      console.log("[Update API] Pasta .git não encontrada. Iniciando atualização via download de ZIP...");
+      runZipUpdateFallback(res, "Instalação sem repositório Git.");
+    }
+
+    async function runZipUpdateFallback(responseObj: any, initialReason: string) {
+      const zipUrl = "https://github.com/gfBarreto/ParrotPrinter/archive/refs/heads/main.zip";
+      const tempZipPath = path.join(process.cwd(), "update-temp.zip");
+      const tempExtractDir = path.join(process.cwd(), "update-temp-extracted");
+
+      console.log(`[Update API - ZIP Fallback] Baixando pacote mais recente de ${zipUrl}...`);
+      try {
+        const fetchRes = await fetch(zipUrl);
+        if (!fetchRes.ok) {
+          throw new Error(`Falha no download do arquivo ZIP do GitHub: Código HTTP ${fetchRes.status}`);
+        }
+        const arrayBuffer = await fetchRes.arrayBuffer();
+        fs.writeFileSync(tempZipPath, Buffer.from(arrayBuffer));
+        console.log("[Update API - ZIP Fallback] Pacote baixado com sucesso. Iniciando descompressão...");
+
+        const isWin = process.platform === "win32";
+        let extractCmd = "";
+
+        if (isWin) {
+          extractCmd = `powershell -Command "Expand-Archive -Path '${tempZipPath}' -DestinationPath '${tempExtractDir}' -Force && Copy-Item -Path '${tempExtractDir}\\ParrotPrinter-main\\*' -Destination '.' -Recurse -Force"`;
+        } else {
+          extractCmd = `unzip -o "${tempZipPath}" -d "${tempExtractDir}" && cp -rf "${tempExtractDir}/ParrotPrinter-main/"* .`;
+        }
+
+        exec(extractCmd, (errExt, stdoutExt, stderrExt) => {
+          // Limpa a sujeira gerada
+          try {
+            if (fs.existsSync(tempZipPath)) fs.unlinkSync(tempZipPath);
+            if (fs.existsSync(tempExtractDir)) fs.rmSync(tempExtractDir, { recursive: true, force: true });
+          } catch (errClean) {
+            console.warn("[Update API - ZIP Fallback] Erro ao limpar arquivos temporários:", errClean);
+          }
+
+          if (errExt) {
+            console.error("[Update API - ZIP Fallback] Falha na descompressão/copiar arquivos:", errExt);
+            return responseObj.status(500).json({
               success: false,
-              message: "Falha ao puxar alterações do GitHub: " + errPull.message,
-              output: stderrPull || stdoutPull
+              message: `${initialReason} Tentativa de descompactar o ZIP do GitHub também falhou. Verifique se possui ferramentas como 'powershell' (Windows) ou 'unzip' (Linux/macOS) instaladas.`
             });
           }
-          runNpmAndBuild(res, "Git pull executado com sucesso.");
-        });
-      } else {
-        runNpmAndBuild(res, "Sincronização com o GitHub concluída.");
-      }
-    });
 
-    function runNpmAndBuild(responseObj: any, gitMsg: string) {
+          console.log("[Update API - ZIP Fallback] Arquivos substituídos com sucesso!");
+          runNpmAndBuild(responseObj, "Atualização do código via pacote ZIP concluída.");
+        });
+      } catch (errZip) {
+        console.error("[Update API - ZIP Fallback] Falha catastrófica no fluxo do ZIP:", errZip);
+        return responseObj.status(500).json({
+          success: false,
+          message: `${initialReason} E erro ao baixar o pacote ZIP direto do GitHub: ${errZip instanceof Error ? errZip.message : 'Erro desconhecido'}`
+        });
+      }
+    }
+
+    function runNpmAndBuild(responseObj: any, successMsg: string) {
       console.log("[Update API] Instalando novas dependências com npm install...");
       exec("npm install", (errNpm, stdoutNpm, stderrNpm) => {
         if (errNpm) {
-          return responseObj.status(500).json({
-            success: false,
-            message: `${gitMsg} Mas falhou ao rodar npm install para novas dependências: ${errNpm.message}`
-          });
+          console.warn("[Update API] Falha no npm install, tentando build direto caso as dependências já existam...", errNpm);
         }
 
         console.log("[Update API] Recompilando o projeto com npm run build...");
@@ -514,14 +558,14 @@ async function startServer() {
           if (errBuild) {
             return responseObj.status(500).json({
               success: false,
-              message: `${gitMsg} Dependências instaladas, mas falhou ao recriar build otimizado (npm run build): ${errBuild.message}`
+              message: `${successMsg} Mas falhou ao recompilar a build ottimizado (npm run build): ${errBuild.message}. No entanto, os arquivos de código já foram atualizados!`
             });
           }
 
           console.log("[Update API] Sistema atualizado com SUCESSO!");
           responseObj.json({
             success: true,
-            message: "ParrotPrinter atualizado com sucesso! Reinicie o seu rodar-no-windows.bat ou recarregue a página se necessário."
+            message: `${successMsg} ParrotPrinter atualizado e compilado com sucesso! Recarregue a página ou reinicie para ativar as modificações.`
           });
         });
       });
