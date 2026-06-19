@@ -784,14 +784,14 @@ export default function App() {
           <div className="mt-3 pt-2.5 border-t border-zinc-850/60 font-sans text-[10px] text-zinc-400 leading-normal space-y-1 bg-zinc-950/40 p-2.5 rounded-lg border border-zinc-850/40">
             <div className="flex items-center gap-1.5 font-bold text-zinc-300">
               <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse" />
-              <span>{lang === 'pt' ? 'Comunidade gfBarreto3d' : lang === 'es' ? 'Comunidad gfBarreto3d' : 'gfBarreto3d Community'}</span>
+              <span>{lang === 'pt' ? 'Aviso!' : lang === 'es' ? '¡Aviso!' : 'Notice!'}</span>
             </div>
             <p className="text-zinc-500 font-semibold leading-normal antialiased text-[10px]">
               {lang === 'pt' 
-                ? 'Este projeto foi desenvolvido com auxílio da IA do Google por gfBarreto3d para uso pessoal. Resolvi disponibilizar para toda a comunidade por ter ajudado significativamente no meu cotidiano com as impressoras!' 
+                ? 'Surgido como um projeto de uso pessoal desenvolvido com o auxílio da IA do Google por gfBarreto3d, este utilitário transformou minha rotina diária no trabalho com as impressoras 3D. Pensando no impacto positivo, decidi disponibilizá-lo para toda a comunidade!' 
                 : lang === 'es' 
-                ? 'Este proyecto fue desarrollado con el apoyo de la IA de Google por gfBarreto3d para uso personal. ¡Decidí compartirlo con toda la comunidad ya que me ha ayudado mucho en mi trabajo diario con las impresoras!' 
-                : 'This project was developed with assistance from Google AI by gfBarreto3d for personal use. I decided to release it to the entire community as it significantly helped my daily work with the printers!'}
+                ? 'Nacido como un proyecto de uso personal desarrollado con la ayuda de la IA de Google por gfBarreto3d, esta herramienta transformó mi rutina diaria en el trabajo con las impresoras 3D. ¡Pensando en su impacto positivo, decidí compartirlo con toda la comunidad!' 
+                : 'Born as a personal utility developed with the assistance of Google AI by gfBarreto3d, this tool transformed my daily workflow with 3D printers. Knowing its positive impact, I decided to share it with the entire community!'}
             </p>
           </div>
         </div>
