@@ -514,7 +514,7 @@ async function startServer() {
       console.error("[Version Service] Erro ao ler package.json local:", err);
     }
 
-    const currentVersion = pkg.version || "1.1.0";
+    const currentVersion = pkg.version || "1.1.1";
     let latestVersion = currentVersion;
     let hasUpdate = false;
 
