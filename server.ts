@@ -417,6 +417,54 @@ async function startServer() {
     res.json({ success: true, message: "Amostra simulada analisada e tocada no servidor se compativel!" });
   });
 
+  // API endpoint for version management (checks local vs GitHub version)
+  app.get("/api/system/version", async (req, res) => {
+    let pkg: any = {};
+    try {
+      const pkgPath = path.join(process.cwd(), "package.json");
+      if (fs.existsSync(pkgPath)) {
+        pkg = JSON.parse(fs.readFileSync(pkgPath, "utf-8"));
+      }
+    } catch (err) {
+      console.error("[Version Service] Erro ao ler package.json local:", err);
+    }
+
+    const currentVersion = pkg.version || "1.1.0";
+    let latestVersion = currentVersion;
+    let hasUpdate = false;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 seconds timeout
+
+      // Fetch official package.json from Github repository gfBarreto/ParrotPrinter
+      const githubResponse = await fetch("https://raw.githubusercontent.com/gfBarreto/ParrotPrinter/main/package.json", {
+        signal: controller.signal
+      });
+
+      clearTimeout(timeoutId);
+
+      if (githubResponse.ok) {
+        const gitPkg = await githubResponse.json();
+        if (gitPkg && gitPkg.version) {
+          latestVersion = gitPkg.version;
+          // Clean comparison: check if there's a different newer version
+          if (latestVersion !== currentVersion) {
+            hasUpdate = true;
+          }
+        }
+      }
+    } catch (err) {
+      console.log("[Version Service] Não foi possível consultar o GitHub de forma concorrente (remoto offline):", err);
+    }
+
+    res.json({
+      currentVersion,
+      latestVersion,
+      hasUpdate
+    });
+  });
+
   // API endpoint to trigger automatic system update directly from the web browser
   app.post("/api/system/update", (req, res) => {
     console.log("[Update API] Solicitação de atualização silenciosa disparada via navegador...");

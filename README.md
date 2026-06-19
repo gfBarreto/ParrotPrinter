@@ -51,15 +51,26 @@ Agora que a pasta está sincronizada com o GitHub:
 
 ## ⚙️ Configuração das Macros no Klipper / Moonraker
 
-Para que as macros que você deseja receber notificação no **ParrotPrinter** consigam disparar as falas e os alarmes sonoros automaticamente, elas **precisam** retornar uma linha de resposta no console. 
+Para que as macros que você deseja receber notificação no **ParrotPrinter** consigam disparar as falas e os alarmes sonoros automaticamente, elas **precisam** retornar uma linha de resposta no console.
 
-Por exemplo, adicione a linha abaixo à sua macro ou lógica no G-code do Klipper (utilizando a diretiva `RESPOND`):
+O exemplo abaixo demonstra como configurar dentro da sua macro de **Print Start** (como a `START_PRINT` ou `PRINT_START` no arquivo de configuração do seu Klipper):
 
 ```gcode
-RESPOND TYPE=command MSG="print_started" #envia mensagem de inicializar a impressão para o ParrotPrinter
+[gcode_macro START_PRINT]
+gcode:
+    # ... comandos de aquecimento e homing ...
+    RESPOND TYPE=command MSG="print_started" #envia mensagem de inicializar a impressão para o ParrotPrinter
+    # ... restante da inicialização da impressão ...
 ```
 
 *Nota: Você pode emitir quaisquer mensagens personalizadas de gatilho, como `print_started`, `print_error`, `filament_runout`, etc., e cadastrá-las na aba **Gatilhos de Sons** no painel do navegador.*
+
+---
+
+## 🔔 Aviso Importante: Mantenha Sempre Atualizado!
+Sempre que uma nova versão do **ParrotPrinter** for lançada ou disponibilizada no repositório GitHub, certifique-se de atualizar sua instalação local para obter as últimas correções de segurança, correções de sintetizador de voz e novos recursos de áudio.
+
+Você receberá um **aviso de atualização** discreto diretamente no canto superior direito do seu painel web e um banner no topo caso haja uma nova versão disponível. Basta clicar em **"Atualizar com 1-Clique"** no navegador para manter o seu painel atualizado instantaneamente!
 
 ---
 

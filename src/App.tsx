@@ -17,7 +17,7 @@ import { LogTable } from './components/LogTable';
 import logoUrl from './assets/images/regenerated_image_1781812433016.png';
 import { 
   Radio, ShieldAlert, Activity, Database, CheckSquare, Settings, 
-  Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders
+  Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders, AlertTriangle
 } from 'lucide-react';
 
 function checkLineMatchesPattern(line: string, pattern: string): boolean {
@@ -103,6 +103,23 @@ export default function App() {
   // States for system update action
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+  const [versionInfo, setVersionInfo] = useState<{ currentVersion: string; latestVersion: string; hasUpdate: boolean } | null>(null);
+
+  const fetchVersionInfo = async () => {
+    try {
+      const response = await fetch('/api/system/version');
+      if (response.ok) {
+        const data = await response.json();
+        setVersionInfo(data);
+      }
+    } catch (err) {
+      console.warn("[Version Check] Erro ao carregar informacoes de versao:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchVersionInfo();
+  }, []);
 
   const handleUpdateSystem = async () => {
     setIsUpdating(true);
@@ -804,8 +821,51 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-2">
+            {versionInfo && (
+              <div className="flex items-center gap-2 text-[10px] font-mono select-none px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full shadow-inner leading-none">
+                <span className="text-zinc-500 font-semibold">v{versionInfo.currentVersion}</span>
+                {versionInfo.hasUpdate ? (
+                  <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2">
+                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shrink-0" />
+                    <span className="text-amber-400 font-semibold block truncate max-w-[120px] sm:max-w-none">
+                      Nova v{versionInfo.latestVersion}!
+                    </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2 text-zinc-500">
+                    <span className="w-1 h-1 bg-emerald-500/60 rounded-full shrink-0" />
+                    <span className="text-[9px] uppercase tracking-wider font-semibold">Atualizado</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </header>
+
+        {/* Global Warning Banner for New Version */}
+        {versionInfo?.hasUpdate && (
+          <div className="mb-6 p-4 bg-amber-550/5 hover:bg-amber-550/10 border border-amber-500/25 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300">
+            <div className="flex items-start md:items-center gap-3">
+              <div className="p-2 bg-amber-500/10 text-amber-400 rounded-lg shrink-0">
+                <AlertTriangle className="w-5 h-5 animate-bounce" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">Nova Versão do ParrotPrinter Disponível!</h4>
+                <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
+                  A versão <strong className="text-zinc-200 font-semibold">v{versionInfo.latestVersion}</strong> foi publicada no GitHub. A sua versão instalada é a <strong className="text-zinc-300 font-semibold">v{versionInfo.currentVersion}</strong>. Atualize o seu sistema para garantir estabilidade e novos bipes.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={handleUpdateSystem}
+              disabled={isUpdating}
+              className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-950 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 select-none shadow-md shrink-0 active:translate-y-[1px]"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
+              {isUpdating ? 'Atualizando...' : 'Atualizar com 1-Clique'}
+            </button>
+          </div>
+        )}
 
         {/* Tab Selection Panels */}
         {activeTab === 'dashboard' && (
