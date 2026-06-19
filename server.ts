@@ -418,13 +418,32 @@ async function startServer() {
     res.json({ success: true, message: "Amostra simulada analisada e tocada no servidor se compativel!" });
   });
 
-  // Helper to fetch JSON from GitHub safely without relying on modern global fetch
-  function fetchJsonFromGithub(url: string, timeoutMs = 2500): Promise<any> {
+  // Helper to fetch JSON from GitHub safely with multiple modern and legacy fallbacks
+  async function fetchJsonFromGithub(url: string, timeoutMs = 8000): Promise<any> {
+    // 1. Try global fetch first if available
+    if (typeof globalThis.fetch === 'function') {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        const response = await globalThis.fetch(url, {
+          headers: { 'User-Agent': 'ParrotPrinter' },
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (response.ok) {
+          return await response.json();
+        }
+      } catch (e: any) {
+        console.log(`[Version Service/Fetch] Native fetch falhou para ${url}:`, e.message || e);
+      }
+    }
+
+    // 2. Fallback to native legacy https check
     return new Promise((resolve, reject) => {
       const parsedUrl = new URL(url);
       const req = https.get({
         hostname: parsedUrl.hostname,
-        path: parsedUrl.pathname,
+        path: parsedUrl.pathname + parsedUrl.search,
         headers: { "User-Agent": "ParrotPrinter" },
         timeout: timeoutMs
       }, (res) => {
@@ -445,7 +464,7 @@ async function startServer() {
       req.on("error", (err) => reject(err));
       req.on("timeout", () => {
         req.destroy();
-        reject(new Error("Timeout ao conectar ao GitHub"));
+        reject(new Error("Timeout ao conectar ao GitHub/CDN"));
       });
     });
   }
@@ -518,17 +537,45 @@ async function startServer() {
     let latestVersion = currentVersion;
     let hasUpdate = false;
 
-    try {
-      // Fetch official package.json from Github repository gfBarreto/ParrotPrinter using our legacy safe https request helper 
-      const gitPkg = await fetchJsonFromGithub("https://raw.githubusercontent.com/gfBarreto/ParrotPrinter/main/package.json");
-      if (gitPkg && gitPkg.version) {
-        latestVersion = gitPkg.version;
-        if (latestVersion !== currentVersion) {
-          hasUpdate = true;
+    // We will try multiple sources sequentially to ensure local machines can bypass domestic DNS/ISP blocks
+    const sources = [
+      { url: "https://raw.githubusercontent.com/gfBarreto/ParrotPrinter/main/package.json", type: "raw" },
+      { url: "https://cdn.jsdelivr.net/gh/gfBarreto/ParrotPrinter@main/package.json", type: "raw" },
+      { url: "https://api.github.com/repos/gfBarreto/ParrotPrinter/contents/package.json", type: "api" }
+    ];
+
+    for (const source of sources) {
+      try {
+        console.log(`[Version Service] Consultando versão via: ${source.url}`);
+        const gitPkg = await fetchJsonFromGithub(source.url, 6000);
+        if (gitPkg) {
+          if (source.type === "api") {
+            if (gitPkg.content && gitPkg.encoding === "base64") {
+              const decoded = Buffer.from(gitPkg.content, "base64").toString("utf-8");
+              const parsed = JSON.parse(decoded);
+              if (parsed && parsed.version) {
+                latestVersion = parsed.version;
+                if (latestVersion !== currentVersion) {
+                  hasUpdate = true;
+                }
+                console.log(`[Version Service] Versão mais recente encontrada via GitHub API: v${latestVersion}`);
+                break;
+              }
+            }
+          } else {
+            if (gitPkg.version) {
+              latestVersion = gitPkg.version;
+              if (latestVersion !== currentVersion) {
+                hasUpdate = true;
+              }
+              console.log(`[Version Service] Versão mais recente encontrada via ${source.url.includes("jsdelivr") ? "jsDelivr" : "GitHub Raw"}: v${latestVersion}`);
+              break;
+            }
+          }
         }
+      } catch (err: any) {
+        console.log(`[Version Service] Não foi possível consultar via ${source.url}:`, err.message);
       }
-    } catch (err: any) {
-      console.log("[Version Service] Nao foi possivel consultar o GitHub (remoto offline ou sem rede):", err.message);
     }
 
     res.json({
