@@ -31,6 +31,8 @@ interface DashboardViewProps {
   audioBlockerActive: boolean;
   clearAudioBlocker: () => void;
   onSimulateLine?: (printerId: string, line: string) => void;
+  t: any;
+  lang: string;
 }
 
 export function DashboardView({
@@ -49,7 +51,9 @@ export function DashboardView({
   onBackupRestoreChange,
   audioBlockerActive,
   clearAudioBlocker,
-  onSimulateLine
+  onSimulateLine,
+  t,
+  lang
 }: DashboardViewProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isBackupSectionOpen, setIsBackupSectionOpen] = useState(false);
@@ -153,11 +157,11 @@ export function DashboardView({
             <Radio className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-xs text-zinc-500 font-semibold uppercase">Status de Rede</div>
-            <div className="font-bold text-lg text-white">
-              {activeConnectedCount} / {totalEnabledCount} Conectadas
+            <div className="text-xs text-zinc-500 font-semibold uppercase">{t.connStatus}</div>
+            <div className="font-bold text-lg text-white font-sans">
+              {activeConnectedCount} / {totalEnabledCount} {lang === 'pt' ? 'Conectadas' : lang === 'es' ? 'Conectadas' : 'Connected'}
             </div>
-            <p className="text-[10px] text-zinc-400 mt-0.5">Escuta em tempo real ativa</p>
+            <p className="text-[10px] text-zinc-400 mt-0.5">{lang === 'pt' ? 'Escuta em tempo real ativa' : lang === 'es' ? 'Escucha activa en tiempo real' : 'Real-time listener active'}</p>
           </div>
         </div>
 
@@ -167,9 +171,11 @@ export function DashboardView({
             <Database className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-xs text-zinc-500 font-semibold uppercase">Log Local</div>
-            <div className="font-bold text-lg text-white">{logs.length} Eventos</div>
-            <p className="text-[10px] text-zinc-400 mt-0.5">Gravando no navegador</p>
+            <div className="text-xs text-zinc-500 font-semibold uppercase">{lang === 'pt' ? 'Logs de Alerta' : lang === 'es' ? 'Logs de Alerta' : 'Alert Logs'}</div>
+            <div className="font-bold text-lg text-white font-sans">
+              {logs.length} {lang === 'pt' ? 'Eventos' : lang === 'es' ? 'Eventos' : 'Events'}
+            </div>
+            <p className="text-[10px] text-zinc-400 mt-0.5">{lang === 'pt' ? 'Persistidos localmente' : lang === 'es' ? 'Persistidos localmente' : 'Persisted locally'}</p>
           </div>
         </div>
 
@@ -179,11 +185,11 @@ export function DashboardView({
             <Activity className="w-6 h-6" />
           </div>
           <div>
-            <div className="text-xs text-zinc-500 font-semibold uppercase">Gatilhos</div>
-            <div className="font-bold text-lg text-white">
-              {triggers.filter(t => t.enabled).length} Ativos
+            <div className="text-xs text-zinc-500 font-semibold uppercase">{lang === 'pt' ? 'Gatilhos de Som' : lang === 'es' ? 'Disparadores de Sonido' : 'Sound Triggers'}</div>
+            <div className="font-bold text-lg text-white font-sans">
+              {triggers.filter(t => t.enabled).length} {lang === 'pt' ? 'Ativos' : lang === 'es' ? 'Activos' : 'Active'}
             </div>
-            <p className="text-[10px] text-zinc-400 mt-0.5">{triggers.length} padrões programados</p>
+            <p className="text-[10px] text-zinc-400 mt-0.5">{triggers.length} {lang === 'pt' ? 'padrões programados' : lang === 'es' ? 'patrones programados' : 'programmed patterns'}</p>
           </div>
         </div>
       </div>
@@ -194,7 +200,7 @@ export function DashboardView({
         {/* Printers columns */}
         <div className="xl:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-bold text-lg text-white tracking-tight">Monitor de Impressoras</h2>
+            <h2 className="font-bold text-lg text-white tracking-tight">{lang === 'pt' ? 'Monitor de Impressoras' : lang === 'es' ? 'Monitoreo de Impresoras' : 'Printers Monitor'}</h2>
             <button
               id="btn-show-add-printer"
               onClick={() => {
@@ -208,19 +214,23 @@ export function DashboardView({
               className="flex items-center gap-1 bg-zinc-800 border border-zinc-700 hover:bg-zinc-750 text-xs font-semibold text-zinc-100 px-3 py-1.5 rounded-lg transition-colors"
             >
               <Plus className="w-3.5 h-3.5 text-zinc-400" />
-              {showAddForm ? 'Fechar Form' : 'Adicionar Impressora'}
+              {showAddForm 
+                ? (lang === 'pt' ? 'Fechar Formulário' : lang === 'es' ? 'Cerrar Formulario' : 'Close Form') 
+                : (lang === 'pt' ? 'Adicionar Impressora' : lang === 'es' ? 'Agregar Impresora' : 'Add Printer')}
             </button>
           </div>
 
           {showAddForm && (
             <div className="bg-zinc-950 border border-zinc-800 rounded-xl p-5 shadow-lg animate-fadeIn space-y-4">
               <h3 className="font-bold text-sm text-zinc-100">
-                {editingPrinterId ? 'Alterar Impressora' : 'Nova Impressora Klipper'}
+                {editingPrinterId 
+                  ? (lang === 'pt' ? 'Alterar Impressora' : lang === 'es' ? 'Modificar Impresora' : 'Modify Printer') 
+                  : (lang === 'pt' ? 'Nova Impressora Klipper' : lang === 'es' ? 'Nueva Impresora Klipper' : 'New Klipper Printer')}
               </h3>
               <form onSubmit={handleSubmitPrinter} className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                   <div>
-                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Apelido (Nome)</label>
+                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">{lang === 'pt' ? 'Apelido (Nome)' : lang === 'es' ? 'Apodo (Nombre)' : 'Nickname (Name)'}</label>
                     <input
                       id="printer-form-name"
                       type="text"
@@ -232,7 +242,7 @@ export function DashboardView({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Endereço IP</label>
+                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">{lang === 'pt' ? 'Endereço IP' : lang === 'es' ? 'Dirección IP' : 'IP Address'}</label>
                     <input
                       id="printer-form-ip"
                       type="text"
@@ -244,7 +254,7 @@ export function DashboardView({
                     />
                   </div>
                   <div>
-                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">Porta API / Websocket</label>
+                    <label className="block text-[11px] text-zinc-400 font-semibold mb-1 uppercase tracking-wider">{lang === 'pt' ? 'Porta API / Websocket' : lang === 'es' ? 'Puerto API / Websocket' : 'API / Websocket Port'}</label>
                     <input
                       id="printer-form-port"
                       type="number"
@@ -260,16 +270,16 @@ export function DashboardView({
                 <div className="border-t border-zinc-900 pt-4">
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-[11px] text-zinc-400 font-bold uppercase tracking-wider">
-                      Gatilhos e Alertas de Áudio Ativos nesta Impressora
+                      {lang === 'pt' ? 'Gatilhos e Sons Ativos nesta Impressora' : lang === 'es' ? 'Disparadores y Sonidos Activos en esta Impresora' : 'Active Sound Triggers for this Printer'}
                     </label>
                     <span className="text-[10px] text-zinc-500 font-semibold">
-                      {selectedTriggerIds.length} de {triggers.length} selecionados
+                      {selectedTriggerIds.length} {lang === 'pt' ? 'de selecionados' : lang === 'es' ? 'de seleccionados' : 'of selected'} {triggers.length}
                     </span>
                   </div>
 
                   {triggers.length === 0 ? (
                     <p className="text-[11px] text-zinc-500 py-2 italic font-medium">
-                      Nenhum alerta/gatilho configurado no sistema. Use a aba "Configurar Sons" para criar novos modelos sonoros.
+                      {lang === 'pt' ? 'Nenhum alerta/gatilho configurado no sistema. Use a aba "Gatilhos de Sons" para criar novos modelos sonoros.' : lang === 'es' ? 'Ningún disparador de audio configurado. Use la pestaña "Disparadores de Sonidos" para agregar modelos.' : 'No sound triggers configured. Use the "Sound Triggers" tab to create new audio alerts.'}
                     </p>
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 bg-zinc-900/10 p-3 border border-zinc-900 rounded-lg max-h-48 overflow-y-auto">
@@ -288,18 +298,18 @@ export function DashboardView({
                               type="checkbox"
                               checked={isChecked}
                               onChange={(e) => {
-                                if (e.target.checked) {
-                                  setSelectedTriggerIds([...selectedTriggerIds, trigger.id]);
-                                } else {
-                                  setSelectedTriggerIds(selectedTriggerIds.filter(id => id !== trigger.id));
-                                }
+                                      if (e.target.checked) {
+                                        setSelectedTriggerIds([...selectedTriggerIds, trigger.id]);
+                                      } else {
+                                        setSelectedTriggerIds(selectedTriggerIds.filter(id => id !== trigger.id));
+                                      }
                               }}
                               className="mt-0.5 rounded border-zinc-700 bg-zinc-800 text-emerald-600 focus:ring-emerald-500/30 text-xs w-3.5 h-3.5"
                             />
                             <div className="space-y-0.5">
                               <div className="text-xs font-bold leading-tight">{trigger.name}</div>
                               <div className="text-[9px] text-zinc-500 leading-none truncate max-w-[150px]">
-                                Padrão: <span className="font-mono bg-zinc-950 px-1 py-0.5 rounded text-[9px] text-zinc-450">{trigger.pattern}</span>
+                                {lang === 'pt' ? 'Padrão' : lang === 'es' ? 'Patrón' : 'Pattern'}: <span className="font-mono bg-zinc-950 px-1 py-0.5 rounded text-[9px] text-zinc-450">{trigger.pattern}</span>
                               </div>
                             </div>
                           </label>
@@ -323,14 +333,14 @@ export function DashboardView({
                     }}
                     className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-850 text-zinc-400 font-bold text-xs rounded transition-colors"
                   >
-                    Cancelar
+                    {t.cancel}
                   </button>
                   <button
                     id="btn-submit-printer"
                     type="submit"
                     className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs text-white rounded transition-colors"
                   >
-                    {editingPrinterId ? 'Salvar' : 'Conectar'}
+                    {editingPrinterId ? t.save : (lang === 'pt' ? 'Conectar' : lang === 'es' ? 'Conectar' : 'Connect')}
                   </button>
                 </div>
               </form>
@@ -354,7 +364,7 @@ export function DashboardView({
             {printers.length === 0 && (
               <div className="col-span-2 text-center py-12 px-4 border border-dashed border-zinc-800 rounded-xl">
                 <Radio className="w-10 h-10 text-zinc-650 mx-auto mb-3" />
-                <p className="text-zinc-500 text-sm font-sans mb-3">Nenhuma impressora configurada.</p>
+                <p className="text-zinc-500 text-sm font-sans mb-3">{lang === 'pt' ? 'Nenhuma impressora configurada.' : lang === 'es' ? 'Ninguna impresora configurada.' : 'No printers configured.'}</p>
                 <button
                   id="btn-add-initial-printer"
                   onClick={() => {
@@ -363,7 +373,7 @@ export function DashboardView({
                   }}
                   className="px-4 py-2 bg-zinc-800 text-zinc-200 text-xs font-semibold rounded-lg hover:bg-zinc-750 transition-colors"
                 >
-                  Adicionar Primeira Impressora
+                  {lang === 'pt' ? 'Adicionar Primeira Impressora' : lang === 'es' ? 'Agregar Primera Impresora' : 'Add First Printer'}
                 </button>
               </div>
             )}
@@ -374,7 +384,7 @@ export function DashboardView({
         <div className="xl:col-span-1 space-y-4">
           {/* Monitor Mode Switch Bar */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex items-center justify-between gap-1.5 shadow-md">
-            <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest select-none">Modo de Escuta:</span>
+            <span className="text-[10px] font-extrabold text-zinc-400 uppercase tracking-widest select-none">{lang === 'pt' ? 'Modo de Escuta:' : lang === 'es' ? 'Modo de Escucha:' : 'Monitoring Mode:'}</span>
             <div className="flex bg-zinc-950 border border-zinc-850 p-1 rounded-lg">
               <button
                 id="btn-monitor-mode-individual"
@@ -386,7 +396,7 @@ export function DashboardView({
                     : 'text-zinc-500 hover:text-zinc-350'
                 }`}
               >
-                Individual
+                {lang === 'pt' ? 'Individual' : lang === 'es' ? 'Individual' : 'Individual'}
               </button>
               <button
                 id="btn-monitor-mode-all"
@@ -398,7 +408,7 @@ export function DashboardView({
                     : 'text-zinc-500 hover:text-zinc-350'
                 }`}
               >
-                Todas
+                {lang === 'pt' ? 'Todas' : lang === 'es' ? 'Todas' : 'All'}
               </button>
             </div>
           </div>
@@ -406,7 +416,7 @@ export function DashboardView({
           <div className="flex items-center justify-between">
             <h2 className="font-bold text-lg text-white tracking-tight flex items-center gap-1.5">
               <Terminal className="w-4 h-4 text-emerald-400" />
-              Terminal de G-Code
+              {lang === 'pt' ? 'Terminal de G-Code' : lang === 'es' ? 'Terminal de G-Code' : 'G-Code Terminal'}
             </h2>
             {monitorMode === 'individual' ? (
               <select
@@ -418,11 +428,11 @@ export function DashboardView({
                 {printers.map((p) => (
                   <option key={p.id} value={p.id}>{p.name}</option>
                 ))}
-                {printers.length === 0 && <option value="">Sem Impressoras</option>}
+                {printers.length === 0 && <option value="">{lang === 'pt' ? 'Sem Impressoras' : lang === 'es' ? 'Sin Impresoras' : 'No Printers'}</option>}
               </select>
             ) : (
               <span className="text-[9px] bg-emerald-950 text-emerald-400 font-extrabold border border-emerald-900 px-2 py-0.5 rounded tracking-wide uppercase">
-                Filtrando {printers.length} Impressoras
+                {lang === 'pt' ? 'Monitorando' : lang === 'es' ? 'Monitoreando' : 'Monitoring'} {printers.length} {lang === 'pt' ? 'Impressoras' : lang === 'es' ? 'Impresoras' : 'Printers'}
               </span>
             )}
           </div>
@@ -443,8 +453,8 @@ export function DashboardView({
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center text-zinc-550 select-none">
                     <Terminal className="w-8 h-8 text-zinc-750 mb-2" />
-                    <p>Aguardando dados G-code...</p>
-                    <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">Selecione uma impressora conectada para inspecionar</p>
+                    <p>{lang === 'pt' ? 'Aguardando dados G-code...' : lang === 'es' ? 'Esperando datos G-code...' : 'Waiting for G-code stream...'}</p>
+                    <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">{lang === 'pt' ? 'Selecione uma impressora conectada para inspecionar' : lang === 'es' ? 'Selecciona una impresora conectada para inspeccionar' : 'Select a connected printer to inspect logs'}</p>
                   </div>
                 )
               ) : (
@@ -461,8 +471,8 @@ export function DashboardView({
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center text-zinc-550 select-none">
                     <Terminal className="w-8 h-8 text-zinc-750 mb-2" />
-                    <p>Aguardando fluxo de dados geral...</p>
-                    <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">A atividade de todas as impressoras aparecerá consolidada aqui</p>
+                    <p>{lang === 'pt' ? 'Aguardando fluxo de dados geral...' : lang === 'es' ? 'Esperando flujo de datos general...' : 'Waiting for consolidated stream...'}</p>
+                    <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-wider">{lang === 'pt' ? 'A atividade de todas as impressoras aparecerá consolidada aqui' : lang === 'es' ? 'La actividad de todas las impresoras se unificará aquí' : 'The activity of all active printers will consolidate here'}</p>
                   </div>
                 )
               )}
@@ -470,8 +480,8 @@ export function DashboardView({
 
             {/* Simulated status ribbon */}
             <div className="border-t border-zinc-900/80 pt-3 mt-3 flex items-center justify-between text-[10px] text-zinc-550 select-none">
-              <span>Websocket moonraker feed</span>
-              <span className="font-semibold text-emerald-500 animate-pulse">● ESCUTA_ATIVA</span>
+              <span>{lang === 'pt' ? 'Fluxo Moonraker/WebSocket' : lang === 'es' ? 'Canal Moonraker/WebSocket' : 'Moonraker/WebSocket stream'}</span>
+              <span className="font-semibold text-emerald-500 animate-pulse">● {lang === 'pt' ? 'ESCUTA ATIVA' : lang === 'es' ? 'ESCUCHA ACTIVA' : 'LISTENING ACTIVE'}</span>
             </div>
           </div>
           

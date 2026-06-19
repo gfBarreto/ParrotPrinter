@@ -4,6 +4,7 @@ import fs from "fs";
 import { exec } from "child_process";
 import { WebSocket as NodeWebSocket } from "ws";
 import { createServer as createViteServer } from "vite";
+import https from "https";
 
 interface Printer {
   id: string;
@@ -417,6 +418,90 @@ async function startServer() {
     res.json({ success: true, message: "Amostra simulada analisada e tocada no servidor se compativel!" });
   });
 
+  // Helper to fetch JSON from GitHub safely without relying on modern global fetch
+  function fetchJsonFromGithub(url: string, timeoutMs = 2500): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const parsedUrl = new URL(url);
+      const req = https.get({
+        hostname: parsedUrl.hostname,
+        path: parsedUrl.pathname,
+        headers: { "User-Agent": "ParrotPrinter" },
+        timeout: timeoutMs
+      }, (res) => {
+        if (res.statusCode !== 200) {
+          reject(new Error(`Erro HTTP ${res.statusCode}`));
+          return;
+        }
+        let data = "";
+        res.on("data", (chunk) => { data += chunk; });
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data));
+          } catch (e) {
+            reject(e);
+          }
+        });
+      });
+      req.on("error", (err) => reject(err));
+      req.on("timeout", () => {
+        req.destroy();
+        reject(new Error("Timeout ao conectar ao GitHub"));
+      });
+    });
+  }
+
+  // Helper to download files following redirections correctly
+  function downloadFileOverHttps(urlStr: string, destPath: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const file = fs.createWriteStream(destPath);
+      
+      function getWithRedirect(targetUrl: string) {
+        let parsedUrl;
+        try {
+          parsedUrl = new URL(targetUrl);
+        } catch (e) {
+          file.close();
+          reject(new Error(`URL inválida: ${targetUrl}`));
+          return;
+        }
+
+        https.get({
+          hostname: parsedUrl.hostname,
+          path: parsedUrl.pathname + parsedUrl.search,
+          headers: { "User-Agent": "ParrotPrinter" }
+        }, (res) => {
+          if (res.statusCode === 301 || res.statusCode === 302) {
+            const redirectUrl = res.headers.location;
+            if (redirectUrl) {
+              getWithRedirect(redirectUrl);
+              return;
+            }
+          }
+          
+          if (res.statusCode !== 200) {
+            file.close();
+            fs.unlink(destPath, () => {});
+            reject(new Error(`Erro HTTP ${res.statusCode} ao baixar`));
+            return;
+          }
+          
+          res.pipe(file);
+          
+          file.on("finish", () => {
+            file.close();
+            resolve();
+          });
+        }).on("error", (err) => {
+          file.close();
+          fs.unlink(destPath, () => {});
+          reject(err);
+        });
+      }
+      
+      getWithRedirect(urlStr);
+    });
+  }
+
   // API endpoint for version management (checks local vs GitHub version)
   app.get("/api/system/version", async (req, res) => {
     let pkg: any = {};
@@ -434,28 +519,16 @@ async function startServer() {
     let hasUpdate = false;
 
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 seconds timeout
-
-      // Fetch official package.json from Github repository gfBarreto/ParrotPrinter
-      const githubResponse = await fetch("https://raw.githubusercontent.com/gfBarreto/ParrotPrinter/main/package.json", {
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (githubResponse.ok) {
-        const gitPkg = await githubResponse.json();
-        if (gitPkg && gitPkg.version) {
-          latestVersion = gitPkg.version;
-          // Clean comparison: check if there's a different newer version
-          if (latestVersion !== currentVersion) {
-            hasUpdate = true;
-          }
+      // Fetch official package.json from Github repository gfBarreto/ParrotPrinter using our legacy safe https request helper 
+      const gitPkg = await fetchJsonFromGithub("https://raw.githubusercontent.com/gfBarreto/ParrotPrinter/main/package.json");
+      if (gitPkg && gitPkg.version) {
+        latestVersion = gitPkg.version;
+        if (latestVersion !== currentVersion) {
+          hasUpdate = true;
         }
       }
-    } catch (err) {
-      console.log("[Version Service] Não foi possível consultar o GitHub de forma concorrente (remoto offline):", err);
+    } catch (err: any) {
+      console.log("[Version Service] Nao foi possivel consultar o GitHub (remoto offline ou sem rede):", err.message);
     }
 
     res.json({
@@ -500,12 +573,7 @@ async function startServer() {
 
       console.log(`[Update API - ZIP Fallback] Baixando pacote mais recente de ${zipUrl}...`);
       try {
-        const fetchRes = await fetch(zipUrl);
-        if (!fetchRes.ok) {
-          throw new Error(`Falha no download do arquivo ZIP do GitHub: Código HTTP ${fetchRes.status}`);
-        }
-        const arrayBuffer = await fetchRes.arrayBuffer();
-        fs.writeFileSync(tempZipPath, Buffer.from(arrayBuffer));
+        await downloadFileOverHttps(zipUrl, tempZipPath);
         console.log("[Update API - ZIP Fallback] Pacote baixado com sucesso. Iniciando descompressão...");
 
         const isWin = process.platform === "win32";
@@ -537,7 +605,7 @@ async function startServer() {
           console.log("[Update API - ZIP Fallback] Arquivos substituídos com sucesso!");
           runNpmAndBuild(responseObj, "Atualização do código via pacote ZIP concluída.");
         });
-      } catch (errZip) {
+      } catch (errZip: any) {
         console.error("[Update API - ZIP Fallback] Falha catastrófica no fluxo do ZIP:", errZip);
         return responseObj.status(500).json({
           success: false,

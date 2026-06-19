@@ -13,6 +13,7 @@ import { triggerSoundAlert } from './utils/audio';
 import { DashboardView } from './components/DashboardView';
 import { TriggerConfig } from './components/TriggerConfig';
 import { LogTable } from './components/LogTable';
+import { translations, Language } from './translations';
 // @ts-ignore
 import logoUrl from './assets/images/regenerated_image_1781812433016.png';
 import { 
@@ -104,6 +105,22 @@ export default function App() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<{ success?: boolean; message?: string } | null>(null);
   const [versionInfo, setVersionInfo] = useState<{ currentVersion: string; latestVersion: string; hasUpdate: boolean } | null>(null);
+  const [lang, setLang] = useState<Language>(() => {
+    try {
+      return (localStorage.getItem('parrot_lang') as Language) || 'pt';
+    } catch {
+      return 'pt';
+    }
+  });
+
+  const handleSetLang = (newLang: Language) => {
+    setLang(newLang);
+    try {
+      localStorage.setItem('parrot_lang', newLang);
+    } catch (e) {}
+  };
+
+  const t = translations[lang];
 
   const fetchVersionInfo = async () => {
     try {
@@ -687,7 +704,7 @@ export default function App() {
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
-              Painel Principal
+              {t.tabDashboard}
             </button>
 
             <button
@@ -700,7 +717,7 @@ export default function App() {
               }`}
             >
               <Sliders className="w-4 h-4" />
-              Gatilhos & Alertas
+              {t.tabTriggers}
             </button>
 
             <button
@@ -713,7 +730,7 @@ export default function App() {
               }`}
             >
               <History className="w-4 h-4" />
-              Logs de Telemetria
+              {t.tabLogs}
               {logs.length > 0 && (
                 <span className="ml-auto bg-zinc-800 text-zinc-400 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
                   {logs.length > 99 ? '99+' : logs.length}
@@ -728,20 +745,22 @@ export default function App() {
           <div className="font-sans pb-2 border-b border-zinc-850">
             <h1 className="font-bold text-sm tracking-tight text-white leading-none mb-1">ParrotPrinter</h1>
             <span className="text-[9px] text-emerald-400 font-extrabold tracking-wider uppercase block bg-emerald-950/45 border border-emerald-900/30 px-1.5 py-0.5 rounded leading-none w-max">
-              DADOS &amp; SOM
+              {lang === 'pt' ? 'DADOS & SOM' : lang === 'es' ? 'DATOS Y SONIDO' : 'DATA & SOUND'}
             </span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span>Escuta WebSocket:</span>
+            <span>{lang === 'pt' ? 'Escuta WebSocket:' : lang === 'es' ? 'Escucha WebSocket:' : 'WebSocket Listener:'}</span>
             <span className="text-emerald-500 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> Ativa
+              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" /> {lang === 'pt' ? 'Ativa' : lang === 'es' ? 'Activa' : 'Active'}
             </span>
           </div>
           <div className="flex items-center justify-between font-sans">
-            <span className="font-mono">Sons Habilitados:</span>
+            <span className="font-mono">{lang === 'pt' ? 'Sons Habilitados:' : lang === 'es' ? 'Sonidos Habilitados:' : 'Sounds Enabled:'}</span>
             <span className={audioBlockerActive ? 'text-amber-500' : 'text-emerald-500'}>
-              {audioBlockerActive ? 'Bloqueado 🔕' : 'Liberado 🔊'}
+              {audioBlockerActive 
+                ? (lang === 'pt' ? 'Bloqueado 🔕' : lang === 'es' ? 'Bloqueado 🔕' : 'Blocked 🔕') 
+                : (lang === 'pt' ? 'Liberado 🔊' : lang === 'es' ? 'Permitido 🔊' : 'Allowed 🔊')}
             </span>
           </div>
 
@@ -757,7 +776,7 @@ export default function App() {
               }`}
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-              {isUpdating ? 'Atualizando...' : 'Atualizar Sistema'}
+              {isUpdating ? t.updating : (lang === 'pt' ? 'Atualizar Sistema' : lang === 'es' ? 'Actualizar Sistema' : 'Update System')}
             </button>
           </div>
         </div>
@@ -779,7 +798,7 @@ export default function App() {
               )}
               <div>
                 <h3 className="text-base font-bold text-white tracking-tight">
-                  {updateStatus.success ? 'Atualização Concluída!' : 'Falha na Atualização'}
+                  {updateStatus.success ? t.updateCompleted : t.updateFailed}
                 </h3>
                 <p className="text-xs text-zinc-400 mt-1.5 leading-relaxed">
                   {updateStatus.message}
@@ -797,7 +816,7 @@ export default function App() {
                 }}
                 className="px-4 py-2 bg-zinc-800 hover:bg-zinc-750 text-white rounded-lg text-xs font-semibold cursor-pointer transition-colors"
               >
-                {updateStatus.success ? 'Recarregar Painel' : 'Fechar'}
+                {updateStatus.success ? t.reloadPanel : t.close}
               </button>
             </div>
           </div>
@@ -810,35 +829,65 @@ export default function App() {
           <div>
             <h2 className="font-sans font-bold text-2xl text-white tracking-tight">
               {activeTab === 'dashboard' && 'ParrotPrinter'}
-              {activeTab === 'triggers' && 'Controle de Sons e Gatilhos'}
-              {activeTab === 'logs' && 'Histórico do Banco de Logs'}
+              {activeTab === 'triggers' && t.triggersTitle}
+              {activeTab === 'logs' && t.eventHistoryTitle}
             </h2>
             <p className="font-sans text-xs text-zinc-400 mt-1">
-              {activeTab === 'dashboard' && 'Status das conexões Moonraker na sua rede local.'}
-              {activeTab === 'triggers' && 'Defina macros de console G-code, de bipes sintetizados até locutor TTS.'}
-              {activeTab === 'logs' && 'Filtre, pesquise e exporte alarmes disparados pelas impressoras.'}
+              {activeTab === 'dashboard' && t.subtitleDashboard}
+              {activeTab === 'triggers' && t.subtitleTriggers}
+              {activeTab === 'logs' && t.subtitleLogs}
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {versionInfo && (
-              <div className="flex items-center gap-2 text-[10px] font-mono select-none px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full shadow-inner leading-none">
-                <span className="text-zinc-500 font-semibold">v{versionInfo.currentVersion}</span>
-                {versionInfo.hasUpdate ? (
-                  <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2">
-                    <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shrink-0" />
-                    <span className="text-amber-400 font-semibold block truncate max-w-[120px] sm:max-w-none">
-                      Nova v{versionInfo.latestVersion}!
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2 text-zinc-500">
-                    <span className="w-1 h-1 bg-emerald-500/60 rounded-full shrink-0" />
-                    <span className="text-[9px] uppercase tracking-wider font-semibold">Atualizado</span>
-                  </div>
-                )}
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            {/* Seletor de Idiomas */}
+            <div className="flex items-center bg-zinc-900/60 border border-zinc-800 rounded-lg p-0.5" id="language-switcher">
+              <button
+                onClick={() => handleSetLang('pt')}
+                title="Português"
+                className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                  lang === 'pt' ? 'bg-emerald-600 text-white font-extrabold' : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                PT
+              </button>
+              <button
+                onClick={() => handleSetLang('en')}
+                title="English"
+                className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                  lang === 'en' ? 'bg-emerald-600 text-white font-extrabold' : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                onClick={() => handleSetLang('es')}
+                title="Español"
+                className={`px-2 py-1 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                  lang === 'es' ? 'bg-emerald-600 text-white font-extrabold' : 'text-zinc-500 hover:text-white'
+                }`}
+              >
+                ES
+              </button>
+            </div>
+
+            {/* Versão (sempre visível) */}
+            <div className="flex items-center gap-2 text-[10px] font-mono select-none px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full shadow-inner leading-none">
+              <span className="text-zinc-500 font-semibold">v{versionInfo?.currentVersion || "1.1.0"}</span>
+              {versionInfo?.hasUpdate ? (
+                <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2">
+                  <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shrink-0" />
+                  <span className="text-amber-400 font-semibold block truncate max-w-[120px] sm:max-w-none">
+                    {lang === 'pt' ? 'Nova' : lang === 'es' ? 'Nueva' : 'New'} v{versionInfo.latestVersion}!
+                  </span>
+                </div>
+              ) : versionInfo ? (
+                <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2 text-zinc-500">
+                  <span className="w-1 h-1 bg-emerald-500/60 rounded-full shrink-0" />
+                  <span className="text-[9px] uppercase tracking-wider font-semibold">{t.updatedStatus}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
         </header>
 
@@ -850,9 +899,11 @@ export default function App() {
                 <AlertTriangle className="w-5 h-5 animate-bounce" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">Nova Versão do ParrotPrinter Disponível!</h4>
+                <h4 className="text-xs font-bold text-zinc-100 uppercase tracking-wider">{t.newVersionTitle}</h4>
                 <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
-                  A versão <strong className="text-zinc-200 font-semibold">v{versionInfo.latestVersion}</strong> foi publicada no GitHub. A sua versão instalada é a <strong className="text-zinc-300 font-semibold">v{versionInfo.currentVersion}</strong>. Atualize o seu sistema para garantir estabilidade e novos bipes.
+                  {t.newVersionMsg
+                    .replace("{version}", `v${versionInfo.latestVersion}`)
+                    .replace("{current}", `v${versionInfo.currentVersion}`)}
                 </p>
               </div>
             </div>
@@ -862,7 +913,7 @@ export default function App() {
               className="px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-950 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center justify-center gap-2 select-none shadow-md shrink-0 active:translate-y-[1px]"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
-              {isUpdating ? 'Atualizando...' : 'Atualizar com 1-Clique'}
+              {isUpdating ? t.updating : t.updateButton}
             </button>
           </div>
         )}
@@ -886,6 +937,8 @@ export default function App() {
             audioBlockerActive={audioBlockerActive}
             clearAudioBlocker={() => setAudioBlockerActive(false)}
             onSimulateLine={handleSimulateLine}
+            t={t}
+            lang={lang}
           />
         )}
 
@@ -898,6 +951,8 @@ export default function App() {
             onUpdateTrigger={handleUpdateTrigger}
             onDeleteTrigger={handleDeleteTrigger}
             onTestTriggerSound={handleTestTriggerSound}
+            t={t}
+            lang={lang}
           />
         )}
 
@@ -913,9 +968,11 @@ export default function App() {
                 handleTestTriggerSound(originalTrigger);
               } else {
                 // Play standard synth default chime if trigger configuration was deleted
-                triggerSoundAlert('synth', 'chime-up', log.printerName, 'custom_alert', 'pt-BR');
+                triggerSoundAlert('synth', 'chime-up', log.printerName, 'custom_alert', lang === 'es' ? 'en-US' : 'pt-BR');
               }
             }}
+            t={t}
+            lang={lang}
           />
         )}
       </main>

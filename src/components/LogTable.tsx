@@ -13,9 +13,11 @@ interface LogTableProps {
   printers: Printer[];
   onClearLogs: () => void;
   onPlaySound: (log: LogEntry) => void;
+  t: any;
+  lang: any;
 }
 
-export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableProps) {
+export function LogTable({ logs, printers, onClearLogs, onPlaySound, t, lang }: LogTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedPrinterId, setSelectedPrinterId] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -88,9 +90,15 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
     <div id="log-table-container" className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-lg">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="font-sans font-bold text-xl text-white tracking-tight">Registro de Eventos (Logs)</h2>
-          <p className="font-sans text-xs text-zinc-400 mt-1">
-            Persistência local ativa. Total de {logs.length} registros no banco local.
+          <h2 className="font-sans font-bold text-xl text-white tracking-tight">
+            {lang === 'pt' ? 'Registro de Eventos (Logs)' : lang === 'es' ? 'Registro de Eventos (Logs)' : 'Event Logs History'}
+          </h2>
+          <p className="font-sans text-xs text-zinc-400 mt-1 font-medium">
+            {lang === 'pt' 
+              ? `Persistência local ativa. Total de ${logs.length} registros no banco local.` 
+              : lang === 'es' 
+              ? `Persistencia local activa. Total de ${logs.length} registros en la base local.` 
+              : `Local persistence active. Total of ${logs.length} records in local storage.`}
           </p>
         </div>
 
@@ -99,18 +107,18 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
             <button
               id="btn-export-logs"
               onClick={exportToCSV}
-              className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-750 text-xs font-semibold text-zinc-200 rounded-lg transition-colors border border-zinc-700/50"
+              className="flex items-center gap-1.5 px-3 py-2 bg-zinc-800 hover:bg-zinc-750 text-xs font-bold text-zinc-200 rounded-lg transition-colors border border-zinc-700/50 cursor-pointer"
             >
-              <Download className="w-4 h-4 text-zinc-400" /> Exportar CSV
+              <Download className="w-4 h-4 text-zinc-400" /> {lang === 'pt' ? 'Exportar CSV' : lang === 'es' ? 'Exportar CSV' : 'Export CSV'}
             </button>
           )}
           <button
             id="btn-clear-logs"
             onClick={onClearLogs}
             disabled={logs.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/30 text-xs font-semibold text-rose-350 disabled:opacity-50 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-rose-955/20 hover:bg-rose-955/40 border border-rose-900/30 text-xs font-bold text-rose-350 disabled:opacity-50 rounded-lg transition-colors cursor-pointer"
           >
-            <Trash2 className="w-4 h-4" /> Limpar Banco
+            <Trash2 className="w-4 h-4" /> {lang === 'pt' ? 'Limpar Banco' : lang === 'es' ? 'Limpiar Base' : 'Clear Database'}
           </button>
         </div>
       </div>
@@ -123,7 +131,7 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
           <input
             id="log-search-input"
             type="text"
-            placeholder="Pesquisar log ou gatilho..."
+            placeholder={lang === 'pt' ? 'Pesquisar log ou gatilho...' : lang === 'es' ? 'Buscar log o disparador...' : 'Search logs or trigger events...'}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500"
@@ -138,7 +146,7 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
             onChange={(e) => setSelectedPrinterId(e.target.value)}
             className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500"
           >
-            <option value="all">Todas as Impressoras</option>
+            <option value="all">{lang === 'pt' ? 'Todas as Impressoras' : lang === 'es' ? 'Todas las Impresoras' : 'All Printers'}</option>
             {printers.map((p) => (
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
@@ -153,11 +161,11 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
             onChange={(e) => setSelectedType(e.target.value)}
             className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500"
           >
-            <option value="all">Todos os Níveis</option>
-            <option value="success">Sucesso (Eventos)</option>
-            <option value="info">Informação (Conexão)</option>
-            <option value="warning">Aviso (GCode)</option>
-            <option value="error">Erros</option>
+            <option value="all">{lang === 'pt' ? 'Todos os Níveis' : lang === 'es' ? 'Todos los Niveles' : 'All Levels'}</option>
+            <option value="success">{lang === 'pt' ? 'Sucesso (Eventos)' : lang === 'es' ? 'Éxito (Eventos)' : 'Success (Events)'}</option>
+            <option value="info">{lang === 'pt' ? 'Informação (Conexão)' : lang === 'es' ? 'Información (Conexión)' : 'Info (Connection)'}</option>
+            <option value="warning">{lang === 'pt' ? 'Aviso (GCode)' : lang === 'es' ? 'Aviso (GCode)' : 'Warning (GCode)'}</option>
+            <option value="error">{lang === 'pt' ? 'Erros' : lang === 'es' ? 'Errores' : 'Errors'}</option>
           </select>
         </div>
       </div>
@@ -166,12 +174,12 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
       <div className="overflow-x-auto rounded-lg border border-zinc-850 bg-zinc-950">
         <table className="w-full min-w-[700px] border-collapse text-left">
           <thead>
-            <tr className="border-b border-zinc-850 bg-zinc-900/60 text-zinc-400 text-xs font-semibold select-none">
-              <th className="p-3.5 pl-4 w-[160px]">Horário</th>
-              <th className="p-3.5 w-[140px]">Impressora</th>
-              <th className="p-3.5 w-[100px]">Nível</th>
-              <th className="p-3.5">Log / GCode Response</th>
-              <th className="p-3.5 w-[130px] text-right pr-4">Gatilho / Som</th>
+            <tr className="border-b border-zinc-850 bg-zinc-900/60 text-zinc-400 text-xs font-extrabold uppercase tracking-wide select-none">
+              <th className="p-3.5 pl-4 w-[160px]">{lang === 'pt' ? 'Horário' : lang === 'es' ? 'Hora' : 'Time'}</th>
+              <th className="p-3.5 w-[140px]">{lang === 'pt' ? 'Impressora' : lang === 'es' ? 'Impresora' : 'Printer'}</th>
+              <th className="p-3.5 w-[100px]">{lang === 'pt' ? 'Nível' : lang === 'es' ? 'Nivel' : 'Level'}</th>
+              <th className="p-3.5">{lang === 'pt' ? 'Log / GCode Response' : lang === 'es' ? 'Log / Respuesta GCode' : 'Log / GCode Response'}</th>
+              <th className="p-3.5 w-[130px] text-right pr-4">{lang === 'pt' ? 'Gatilho / Som' : lang === 'es' ? 'Disparador / Sonido' : 'Trigger / Sound'}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-900">
@@ -182,18 +190,24 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
                   <tr 
                     key={log.id} 
                     id={`log-row-${log.id}`}
-                    className="hover:bg-zinc-900/30 text-sm transition-colors text-zinc-300"
+                    className="hover:bg-zinc-900/30 text-sm transition-colors text-zinc-300 pointer-events-auto"
                   >
                     <td className="p-3 pl-4 font-mono text-xs text-zinc-500 whitespace-nowrap">
                       {new Date(log.timestamp).toLocaleString('pt-BR')}
                     </td>
-                    <td className="p-3 font-sans font-medium text-zinc-300 whitespace-nowrap">
+                    <td className="p-3 font-sans font-bold text-zinc-300 whitespace-nowrap">
                       {log.printerName}
                     </td>
                     <td className="p-3">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded border text-xs font-semibold whitespace-nowrap ${styling.bg}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded border text-[11px] font-black uppercase whitespace-nowrap ${styling.bg}`}>
                         {styling.icon}
-                        {log.type === 'success' ? 'Evento' : log.type === 'info' ? 'Sistema' : log.type === 'warning' ? 'Aviso' : 'Erro'}
+                        {log.type === 'success' 
+                          ? (lang === 'pt' ? 'Evento' : lang === 'es' ? 'Evento' : 'Event') 
+                          : log.type === 'info' 
+                          ? (lang === 'pt' ? 'Sistema' : lang === 'es' ? 'Sistema' : 'System') 
+                          : log.type === 'warning' 
+                          ? (lang === 'pt' ? 'Aviso' : lang === 'es' ? 'Aviso' : 'Warning') 
+                          : (lang === 'pt' ? 'Erro' : lang === 'es' ? 'Error' : 'Error')}
                       </span>
                     </td>
                     <td className="p-3 font-mono text-xs break-all max-w-[400px]">
@@ -203,18 +217,18 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
                       {log.eventTriggerName ? (
                         <div className="flex items-center justify-end gap-1.5">
                           <div className="text-right">
-                            <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-medium block">
+                            <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold block whitespace-nowrap">
                               {log.eventTriggerName}
                             </span>
-                            <span className="text-[10px] text-zinc-500 font-mono block mt-0.5">
+                            <span className="text-[10px] text-zinc-500 font-mono block mt-0.5 uppercase tracking-wide">
                               {log.soundPlayed}
                             </span>
                           </div>
                           <button
                             id={`btn-replay-${log.id}`}
-                            title="Tocar Alerta Novamente"
+                            title={lang === 'pt' ? 'Tocar Alerta Novamente' : lang === 'es' ? 'Reproducir Alerta Nuevamente' : 'Replay Alarm Alert'}
                             onClick={() => onPlaySound(log)}
-                            className="p-1 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded transition-colors"
+                            className="p-1 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded transition-colors cursor-pointer"
                           >
                             <Volume2 className="w-3.5 h-3.5" />
                           </button>
@@ -228,8 +242,8 @@ export function LogTable({ logs, printers, onClearLogs, onPlaySound }: LogTableP
               })
             ) : (
               <tr>
-                <td colSpan={5} className="p-12 text-center text-zinc-500 font-sans">
-                  Nenhum registro encontrado correspondente aos filtros.
+                <td colSpan={5} className="p-12 text-center text-zinc-500 font-bold font-sans">
+                  {lang === 'pt' ? 'Nenhum registro encontrado correspondente aos filtros.' : lang === 'es' ? 'No se encontraron registros que coincidan con los filtros.' : 'No log entries found matching selected filters.'}
                 </td>
               </tr>
             )}

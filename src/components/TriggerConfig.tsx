@@ -19,6 +19,8 @@ interface TriggerConfigProps {
   onUpdateTrigger: (trigger: EventTrigger) => void;
   onDeleteTrigger: (id: string) => void;
   onTestTriggerSound: (trigger: EventTrigger) => void;
+  t: any;
+  lang: string;
 }
 
 export function TriggerConfig({
@@ -28,7 +30,9 @@ export function TriggerConfig({
   onAddTrigger,
   onUpdateTrigger,
   onDeleteTrigger,
-  onTestTriggerSound
+  onTestTriggerSound,
+  t,
+  lang
 }: TriggerConfigProps) {
   // Selected printer for individual triggers configuration
   const [selectedPrinterId, setSelectedPrinterId] = useState<string>(() => {
@@ -140,53 +144,89 @@ export function TriggerConfig({
     
     const defaults: Omit<EventTrigger, 'id'>[] = [
       {
-        name: 'Início de Impressão',
+        name: lang === 'pt' ? 'Início de Impressão' : lang === 'es' ? 'Inicio de Impresión' : 'Print Started',
         pattern: '// print_started',
         soundType: 'speech',
-        soundValue: `Impressão iniciada na impressora ${printerName}`,
-        voiceLanguage: 'pt-BR',
+        soundValue: lang === 'pt' 
+          ? `Impressão iniciada na impressora ${printerName}` 
+          : lang === 'es' 
+          ? `Impresión iniciada en la impresora ${printerName}` 
+          : `Printing started on printer ${printerName}`,
+        voiceLanguage: lang === 'es' ? 'en-US' : 'pt-BR', // fallback
         enabled: true,
-        description: `Disparado quando a ${printerName} começa a imprimir um novo arquivo G-code.`,
+        description: lang === 'pt' 
+          ? `Disparado quando a ${printerName} começa a imprimir um novo arquivo G-code.` 
+          : lang === 'es' 
+          ? `Se activa cuando la ${printerName} comienza a imprimir un archivo G-code.` 
+          : `Triggered when ${printerName} starts printing a new G-code file.`,
         printerId: selectedPrinterId
       },
       {
-        name: 'Impressão Concluída',
+        name: lang === 'pt' ? 'Impressão Concluída' : lang === 'es' ? 'Impresión Finalizada' : 'Print Completed',
         pattern: '// print_done',
         soundType: 'speech',
-        soundValue: `Impressão concluída com sucesso na impressora ${printerName}`,
-        voiceLanguage: 'pt-BR',
+        soundValue: lang === 'pt' 
+          ? `Impressão concluída com sucesso na impressora ${printerName}` 
+          : lang === 'es' 
+          ? `Impresión finalizada con éxito en la impresora ${printerName}` 
+          : `Printing completed successfully on printer ${printerName}`,
+        voiceLanguage: lang === 'es' ? 'en-US' : 'pt-BR',
         enabled: true,
-        description: `Disparado ao término bem-sucedido de uma impressão na ${printerName}.`,
+        description: lang === 'pt' 
+          ? `Disparado ao término bem-sucedido de uma impressão na ${printerName}.` 
+          : lang === 'es' 
+          ? `Se activa cuando termina con éxito la impresión en la ${printerName}.` 
+          : `Triggered upon successful print completion on ${printerName}.`,
         printerId: selectedPrinterId
       },
       {
-        name: 'Falha na Impressão',
+        name: lang === 'pt' ? 'Falha na Impressão' : lang === 'es' ? 'Falla de Impresión' : 'Print Failed',
         pattern: '// print_failed',
         soundType: 'synth',
         soundValue: 'alarm-loop',
         voiceLanguage: 'pt-BR',
         enabled: true,
-        description: `Disparado se a impressão da ${printerName} falhar ou for cancelada por erro.`,
+        description: lang === 'pt' 
+          ? `Disparado se a impressão da ${printerName} falhar ou for cancelada por erro.` 
+          : lang === 'es' 
+          ? `Se activa si la impresión de ${printerName} falla o se cancela.` 
+          : `Triggered if printing on ${printerName} fails or is cancelled.`,
         printerId: selectedPrinterId
       },
       {
-        name: 'Impressão Pausada',
+        name: lang === 'pt' ? 'Impressão Pausada' : lang === 'es' ? 'Impresión Pausada' : 'Print Paused',
         pattern: '// print_pause',
         soundType: 'speech',
-        soundValue: `Impressão pausada na impressora ${printerName}`,
-        voiceLanguage: 'pt-BR',
+        soundValue: lang === 'pt' 
+          ? `Impressão pausada na impressora ${printerName}` 
+          : lang === 'es' 
+          ? `Impresión pausada en la impresora ${printerName}` 
+          : `Printing paused on printer ${printerName}`,
+        voiceLanguage: lang === 'es' ? 'en-US' : 'pt-BR',
         enabled: true,
-        description: `Disparado ao pausar a execução da impressão na ${printerName}.`,
+        description: lang === 'pt' 
+          ? `Disparado ao pausar a execução da impressão na ${printerName}.` 
+          : lang === 'es' 
+          ? `Se activa al pausar la ejecución de la impresión en la ${printerName}.` 
+          : `Triggered when execution is paused on ${printerName}.`,
         printerId: selectedPrinterId
       },
       {
-        name: 'Troca de Filamento',
+        name: lang === 'pt' ? 'Troca de Filamento' : lang === 'es' ? 'Cambio de Filamento' : 'Filament Change',
         pattern: '// filament_change',
         soundType: 'speech',
-        soundValue: `Atenção, a impressora ${printerName} solicita troca de filamento`,
-        voiceLanguage: 'pt-BR',
+        soundValue: lang === 'pt' 
+          ? `Atenção, a impressora ${printerName} solicita troca de filamento` 
+          : lang === 'es' 
+          ? `Atención, la impresora ${printerName} solicita cambio de filamento` 
+          : `Attention, printer ${printerName} requests a filament change`,
+        voiceLanguage: lang === 'es' ? 'en-US' : 'pt-BR',
         enabled: true,
-        description: `Disparado durante pedidos de troca de filamento na ${printerName}.`,
+        description: lang === 'pt' 
+          ? `Disparado durante pedidos de troca de filamento na ${printerName}.` 
+          : lang === 'es' 
+          ? `Se activa durante la solicitud de cambio de filamento en la ${printerName}.` 
+          : `Triggered during filament change requests on ${printerName}.`,
         printerId: selectedPrinterId
       }
     ];
@@ -209,11 +249,11 @@ export function TriggerConfig({
   const selectedPrinter = printers.find(p => p.id === selectedPrinterId);
 
   const synthPresets: { value: SynthPreset; label: string }[] = [
-    { value: 'chime-up', label: 'Sinos Crescente (Início)' },
-    { value: 'chime-down', label: 'Sinos Decrescente (Troca)' },
-    { value: 'alarm-loop', label: 'Alarme / Sirene Crítica (Falha)' },
-    { value: 'beep-multiple', label: 'Duplo Beep Metálico (Pausa)' },
-    { value: 'laser', label: 'Efeito Arcade Laser (Finalizado)' },
+    { value: 'chime-up', label: lang === 'pt' ? 'Sinos Crescente (Início)' : lang === 'es' ? 'Sinos Ascendentes (Inicio)' : 'Chime Up (Start)' },
+    { value: 'chime-down', label: lang === 'pt' ? 'Sinos Decrescente (Troca)' : lang === 'es' ? 'Sinos Descendentes (Cambio)' : 'Chime Down (Change)' },
+    { value: 'alarm-loop', label: lang === 'pt' ? 'Alarme / Sirene Crítica (Falha)' : lang === 'es' ? 'Alarma / Sirena Protagónica (Bucle)' : 'Industrial Siren (Loop)' },
+    { value: 'beep-multiple', label: lang === 'pt' ? 'Duplo Beep Metálico (Pausa)' : lang === 'es' ? 'Pitidos Intermitentes Rápido' : 'Rapid Beeps (Multiple)' },
+    { value: 'laser', label: lang === 'pt' ? 'Efeito Arcade Laser (Finalizado)' : lang === 'es' ? 'Efecto Láser Arcade' : 'Arcade Laser Effect (Completed)' },
   ];
 
   return (
@@ -223,13 +263,17 @@ export function TriggerConfig({
         <div className="space-y-1">
           <h2 className="text-sm font-bold text-zinc-100 flex items-center gap-2">
             <Volume2 className="w-4 h-4 text-emerald-400 animate-pulse" />
-            Configuração de Alertas por Impressora
+            {lang === 'pt' ? 'Configuração de Alertas por Impressora' : lang === 'es' ? 'Configuración de Alertas por Impresora' : 'Sound Alerts Configuration by Printer'}
           </h2>
-          <p className="text-xs text-zinc-400">Configure sons e frases personalizadas com o nome de cada impressora.</p>
+          <p className="text-xs text-zinc-400">
+            {lang === 'pt' ? 'Configure sons e frases personalizadas com o nome de cada impressora.' : lang === 'es' ? 'Configure sonidos y frases personalizadas con el nombre de cada impresora.' : 'Configure custom sounds and speech phrases with the name of each printer.'}
+          </p>
         </div>
         
         <div className="flex items-center gap-3 w-full md:w-auto">
-          <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest whitespace-nowrap">Selecionar Impressora:</label>
+          <label className="text-xs font-bold text-zinc-400 uppercase tracking-widest whitespace-nowrap">
+            {lang === 'pt' ? 'Selecionar Impressora:' : lang === 'es' ? 'Seleccionar Impresora:' : 'Select Printer:'}
+          </label>
           <select
             id="printer-config-selector"
             value={selectedPrinterId}
@@ -245,7 +289,7 @@ export function TriggerConfig({
               </option>
             ))}
             {printers.length === 0 && (
-              <option value="">Nenhuma impressora cadastrada</option>
+              <option value="">{lang === 'pt' ? 'Nenhuma impressora cadastrada' : lang === 'es' ? 'Ninguna impresora registrada' : 'No printers registered'}</option>
             )}
           </select>
         </div>
@@ -256,7 +300,11 @@ export function TriggerConfig({
         <div className="lg:col-span-1 bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-lg h-fit">
           <div className="flex items-center justify-between mb-4 pb-2 border-b border-zinc-800">
             <h3 className="font-sans font-bold text-white text-base">
-              {editingTriggerId ? 'Editar Detecção de Evento' : isAdding ? 'Novo Gatilho de Alerta' : 'Painel de Configuração'}
+              {editingTriggerId 
+                ? (lang === 'pt' ? 'Editar Detecção de Evento' : lang === 'es' ? 'Editar Detección de Evento' : 'Edit Event Detection') 
+                : isAdding 
+                ? (lang === 'pt' ? 'Novo Gatilho de Alerta' : lang === 'es' ? 'Nuevo Disparador de Alerta' : 'New Alert Trigger') 
+                : (lang === 'pt' ? 'Painel de Configuração' : lang === 'es' ? 'Panel de Configuración' : 'Configuration Panel')}
             </h3>
             {(editingTriggerId || isAdding) && (
               <button
@@ -271,12 +319,12 @@ export function TriggerConfig({
 
           {!selectedPrinterId ? (
             <div className="py-6 text-center text-zinc-500 text-xs italic">
-              Adicione uma impressora na aba principal para configurar alertas.
+              {lang === 'pt' ? 'Adicione uma impressora na aba principal para configurar alertas.' : lang === 'es' ? 'Agregue una impresora en la pestaña principal para configurar alertas.' : 'Add a printer in the main tab to configure alerts.'}
             </div>
           ) : !(editingTriggerId || isAdding) ? (
             <div className="py-4 text-center">
-              <p className="font-sans text-xs text-zinc-400 px-4 leading-relaxed">
-                Adicione alertas individuais ou altere os existentes para a impressora <span className="text-emerald-400 font-bold font-mono">{(selectedPrinter?.name || '').toUpperCase()}</span>.
+              <p className="font-sans text-xs text-zinc-400 px-4 leading-relaxed font-medium">
+                {lang === 'pt' ? 'Adicione alertas individuais ou altere os existentes para a impressora' : lang === 'es' ? 'Agregue alertas individuales o modifique los existentes para la impresora' : 'Add individual alerts or modify existing ones for printer'} <span className="text-emerald-400 font-bold font-mono">{(selectedPrinter?.name || '').toUpperCase()}</span>.
               </p>
               <button
                 id="btn-new-trigger"
@@ -286,18 +334,18 @@ export function TriggerConfig({
                 }}
                 className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs rounded-lg shadow-md hover:shadow-emerald-900/35 transition-all cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" /> Criar Novo Alerta
+                <Plus className="w-3.5 h-3.5" /> {lang === 'pt' ? 'Criar Novo Alerta' : lang === 'es' ? 'Crear Nuevo Alerta' : 'Create New Alert'}
               </button>
             </div>
           ) : (
             <form onSubmit={handleSave} className="space-y-4 font-sans">
               <div className="bg-zinc-950/40 p-2.5 rounded-lg border border-zinc-800/50 mb-2">
-                <span className="text-[10px] text-zinc-500 uppercase font-bold block">Destinado para:</span>
+                <span className="text-[10px] text-zinc-500 uppercase font-bold block">{lang === 'pt' ? 'Destinado para:' : lang === 'es' ? 'Destinado para:' : 'Assigned to:'}</span>
                 <span className="text-xs text-zinc-300 font-black font-mono tracking-wide">{(selectedPrinter?.name || '').toUpperCase()} ({selectedPrinter?.ip})</span>
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">Nome do Gatilho</label>
+                <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{t.triggerName}</label>
                 <input
                   id="trigger-form-name"
                   type="text"
@@ -311,11 +359,11 @@ export function TriggerConfig({
 
               <div>
                 <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1 flex items-center gap-1">
-                  G-Code Text ID / Pattern
+                  {lang === 'pt' ? 'Termo G-Code a Monitorar' : lang === 'es' ? 'Texto G-Code a Monitorear' : 'G-Code Text to Monitor'}
                   <span className="group relative cursor-help">
                     <HelpCircle className="w-3.5 h-3.5 text-zinc-650" />
-                    <span className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 text-zinc-350 p-2 rounded text-[10px] w-48 z-20 shadow-xl">
-                      Linha enviada pelo console da impressora. Ex: '// filament_change' ou 'M600'
+                    <span className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 bg-zinc-950 border border-zinc-800 text-zinc-350 p-2 rounded text-[10px] w-48 z-20 shadow-xl normality">
+                      {lang === 'pt' ? "Linha enviada pelo console da impressora. Ex: '// filament_change' ou 'M600'" : lang === 'es' ? "Línea enviada desde la consola de la impresora. Ej: '// filament_change' o 'M600'" : "Line sent by printer console. Ex: '// filament_change' or 'M600'"}
                     </span>
                   </span>
                 </label>
@@ -331,7 +379,7 @@ export function TriggerConfig({
               </div>
 
               <div>
-                <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">Tipo de Áudio/Alerta</label>
+                <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{t.soundType}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     id="btn-sound-type-synth"
@@ -340,13 +388,13 @@ export function TriggerConfig({
                       setSoundType('synth');
                       setSoundValue('chime-up');
                     }}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                       soundType === 'synth'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40 shadow'
                         : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:bg-zinc-900'
                     }`}
                   >
-                    Sintetizador Beeps
+                    {lang === 'pt' ? 'Sintetizador Beeps' : lang === 'es' ? 'Sintetizador Pitidos' : 'Beeps Synthesizer'}
                   </button>
                   <button
                     id="btn-sound-type-speech"
@@ -355,13 +403,13 @@ export function TriggerConfig({
                       setSoundType('speech');
                       setSoundValue('');
                     }}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                       soundType === 'speech'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40 shadow'
                         : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:bg-zinc-900'
                     }`}
                   >
-                    Voz TTS (Estilo Siri)
+                    {lang === 'pt' ? 'Voz TTS (Siri)' : lang === 'es' ? 'Voz TTS (Siri)' : 'TTS Voice (Siri)'}
                   </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
@@ -372,13 +420,13 @@ export function TriggerConfig({
                       setSoundType('upload');
                       setSoundValue('');
                     }}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                       soundType === 'upload'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40 shadow'
                         : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:bg-zinc-900'
                     }`}
                   >
-                    Upload de Áudio
+                    {lang === 'pt' ? 'Upload de Áudio' : lang === 'es' ? 'Subir Archivo' : 'Audio Upload'}
                   </button>
                   <button
                     id="btn-sound-type-url"
@@ -387,13 +435,13 @@ export function TriggerConfig({
                       setSoundType('url');
                       setSoundValue('https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg');
                     }}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all cursor-pointer ${
                       soundType === 'url'
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/40 shadow'
                         : 'bg-zinc-950 text-zinc-400 border-zinc-800 hover:bg-zinc-900'
                     }`}
                   >
-                    URL de Áudio Web
+                    {lang === 'pt' ? 'URL de Áudio Web' : lang === 'es' ? 'URL de Audio' : 'Web Audio URL'}
                   </button>
                 </div>
               </div>
@@ -401,7 +449,7 @@ export function TriggerConfig({
               {/* Config Fields based on Sound Type */}
               {soundType === 'synth' && (
                 <div>
-                  <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">Tom do Sintetizador</label>
+                  <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{lang === 'pt' ? 'Tom do Sintetizador' : lang === 'es' ? 'Tono del Sintetizador' : 'Synthesizer Preset'}</label>
                   <select
                     id="trigger-form-synth-value"
                     value={soundValue}
@@ -418,7 +466,7 @@ export function TriggerConfig({
               {soundType === 'speech' && (
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">Idioma da Locução</label>
+                    <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{t.voiceLang}</label>
                     <select
                       id="trigger-form-voice-lang"
                       value={voiceLanguage}
@@ -430,7 +478,7 @@ export function TriggerConfig({
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">Frase Falar (Voz Sintética)</label>
+                    <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{lang === 'pt' ? 'Frase a Falar (Voz Sintética)' : lang === 'es' ? 'Texto a Pronunciar (TTS)' : 'Text to Synthesize (TTS)'}</label>
                     <textarea
                       id="trigger-form-speech-value"
                       rows={3}
@@ -440,8 +488,8 @@ export function TriggerConfig({
                       onChange={(e) => setSoundValue(e.target.value)}
                       className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
                     />
-                    <p className="text-[10px] text-zinc-500 mt-0.5 leading-tight">
-                      Dica: Digite exatamente o que você quer que o assistente fale ao detectar o sinal gcode desta impressora.
+                    <p className="text-[10px] text-zinc-500 mt-0.5 leading-tight font-medium">
+                      {lang === 'pt' ? 'Dica: Digite exatamente o que você quer que o assistente fale ao detectar este sinal.' : lang === 'es' ? 'Consejo: Escribe exactamente lo que quieras que el asistente diga al escuchar este evento.' : 'Tip: Enter exactly what you want the assistant to speak when detecting this event.'}
                     </p>
                   </div>
                 </div>
@@ -449,7 +497,7 @@ export function TriggerConfig({
 
               {soundType === 'upload' && (
                 <div className="space-y-2 border border-dashed border-zinc-800 rounded-lg p-3 bg-zinc-950/30">
-                  <label className="block text-xs text-zinc-400 font-semibold uppercase">Escolher Arquivo MP3/WAV</label>
+                  <label className="block text-xs text-zinc-400 font-semibold uppercase">{lang === 'pt' ? 'Escolher Arquivo MP3/WAV' : lang === 'es' ? 'Seleccionar Archivo MP3/WAV' : 'Choose MP3/WAV File'}</label>
                   <input
                     id="trigger-form-file-value"
                     type="file"
@@ -458,12 +506,12 @@ export function TriggerConfig({
                     className="text-xs text-zinc-400 file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-zinc-800 file:text-zinc-200 hover:file:bg-zinc-700 cursor-pointer"
                   />
                   {uploadProgress && (
-                    <div className="text-[10px] text-amber-500 font-bold animate-pulse">Carregando arquivo...</div>
+                    <div className="text-[10px] text-amber-500 font-bold animate-pulse">{lang === 'pt' ? 'Carregando arquivo...' : lang === 'es' ? 'Subiendo archivo...' : 'Uploading file...'}</div>
                   )}
                   {soundValue && !uploadProgress && (
-                    <div className="text-[10px] text-emerald-400 flex items-center gap-1">
+                    <div className="text-[10px] text-emerald-400 flex items-center gap-1 font-bold">
                       <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full" />
-                      Áudio carregado e pronto!
+                      {lang === 'pt' ? 'Áudio carregado e pronto!' : lang === 'es' ? '¡Audio subido con éxito!' : 'Audio loaded and ready!'}
                     </div>
                   )}
                 </div>
@@ -471,7 +519,7 @@ export function TriggerConfig({
 
               {soundType === 'url' && (
                 <div>
-                  <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">URL de Áudio Online</label>
+                  <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{lang === 'pt' ? 'URL de Áudio Online' : lang === 'es' ? 'URL del Audio Online' : 'Online Audio URL'}</label>
                   <input
                     id="trigger-form-url-value"
                     type="url"
@@ -485,11 +533,11 @@ export function TriggerConfig({
               )}
 
               <div>
-                <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">Descrição</label>
+                <label className="block text-xs text-zinc-400 font-semibold uppercase mb-1">{t.description}</label>
                 <textarea
                   id="trigger-form-desc"
                   rows={2}
-                  placeholder="Explicação do propósito desta notificação."
+                  placeholder={lang === 'pt' ? 'Explicação do propósito desta notificação.' : lang === 'es' ? 'Explica el propósito de esta notificación.' : 'Explanation of this trigger alert.'}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-lg text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
@@ -502,7 +550,7 @@ export function TriggerConfig({
                   type="submit"
                   className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-3 rounded-lg text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Save className="w-3.5 h-3.5" /> Salvar Alerta
+                  <Save className="w-3.5 h-3.5" /> {t.save}
                 </button>
                 <button
                   id="btn-preview-trigger-form"
@@ -525,15 +573,18 @@ export function TriggerConfig({
             </form>
           )}
         </div>
-
-        {/* Right side: triggers list */}
+         {/* Right side: triggers list */}
         <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-xl p-5 shadow-lg flex flex-col justify-between">
           <div>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
-                <h2 className="font-sans font-bold text-lg text-white">Eventos & Respostas de Áudio</h2>
-                <p className="font-sans text-xs text-zinc-400 mt-0.5">
-                  Configure as strings de saída gcode. Ao detectar estas assinaturas no console da impressora selecionada, o som correspondente será tocado.
+                <h2 className="font-sans font-bold text-lg text-white">{lang === 'pt' ? 'Eventos & Respostas de Áudio' : lang === 'es' ? 'Eventos y Respuestas de Audio' : 'Events & Audio Responses'}</h2>
+                <p className="font-sans text-xs text-zinc-400 mt-0.5 font-medium">
+                  {lang === 'pt' 
+                    ? 'Configure as strings de saída gcode. Ao detectar estas assinaturas no console da impressora selecionada, o som correspondente será tocado.' 
+                    : lang === 'es' 
+                    ? 'Configure los textos de salida de gcode. Al detectar estas firmas en la consola de la impresora seleccionada, se reproducirá el sonido.' 
+                    : 'Configure the gcode output text strings. Upon detecting these terms in the selected printer\'s console, the corresponding sound will play.'}
                 </p>
               </div>
               <span className="text-[10px] text-emerald-400 font-extrabold tracking-wider bg-emerald-950/40 border border-emerald-900/30 px-2 py-1 rounded w-max select-none font-mono flex items-center gap-1.5">
@@ -567,23 +618,23 @@ export function TriggerConfig({
                             : 'bg-teal-950/60 text-teal-400 border border-teal-900/40'
                         }`}>
                           {trigger.soundType === 'speech' 
-                            ? `Falar Voz TTS (${trigger.voiceLanguage})` 
+                            ? (lang === 'pt' ? 'Falar Voz TTS (Siri)' : lang === 'es' ? 'Falar Voces TTS' : 'TTS Voice (Siri)') 
                             : trigger.soundType === 'synth' 
-                            ? 'Beeps Sintetizador' 
+                            ? (lang === 'pt' ? 'Beeps Sintetizador' : lang === 'es' ? 'Pitidos Sintetizador' : 'Synthesizer Beeps') 
                             : trigger.soundType === 'upload' 
-                            ? 'Arquivo de Áudio Upload' 
-                            : 'Ficheiro Web URL'}
+                            ? (lang === 'pt' ? 'Arquivo de Áudio Upload' : lang === 'es' ? 'Archivo Subido' : 'Uploaded Audio File') 
+                            : (lang === 'pt' ? 'Endereço Web URL' : lang === 'es' ? 'URL de Audio Web' : 'Web Audio URL')}
                         </span>
                       </div>
                       
                       <div className="flex items-center gap-2 mt-1.5">
-                        <span className="font-mono text-[11px] text-emerald-400 bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded">
-                          Termo de captura: "{trigger.pattern}"
+                        <span className="font-mono text-[11px] text-emerald-400 bg-zinc-900 border border-zinc-850 px-2 py-0.5 rounded font-bold">
+                          {lang === 'pt' ? 'Termo de captura:' : lang === 'es' ? 'Término de captura:' : 'Capture pattern:'} "{trigger.pattern}"
                         </span>
                       </div>
 
                       {trigger.description && (
-                        <p className="font-sans text-xs text-zinc-500 mt-2 leading-relaxed">
+                        <p className="font-sans text-xs text-zinc-500 mt-2 leading-relaxed font-semibold">
                           {trigger.description}
                         </p>
                       )}
@@ -592,7 +643,7 @@ export function TriggerConfig({
                     <div className="flex items-center gap-1 flex-shrink-0">
                       <button
                         id={`btn-play-trigger-${trigger.id}`}
-                        title="Reproduzir alerta de áudio no painel"
+                        title={lang === 'pt' ? 'Reproduzir alerta de áudio no painel' : lang === 'es' ? 'Reproducir alerta de sonido' : 'Replay audio alert'}
                         type="button"
                         onClick={() => onTestTriggerSound(trigger)}
                         className="p-1.5 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded transition-colors"
@@ -601,7 +652,7 @@ export function TriggerConfig({
                       </button>
                       <button
                         id={`btn-edit-trigger-${trigger.id}`}
-                        title="Configurar áudio"
+                        title={lang === 'pt' ? 'Configurar áudio' : lang === 'es' ? 'Configurar sonido' : 'Configure sound alert'}
                         type="button"
                         onClick={() => handleEdit(trigger)}
                         className="p-1.5 text-zinc-400 hover:text-emerald-400 hover:bg-zinc-800 rounded transition-colors"
@@ -611,10 +662,15 @@ export function TriggerConfig({
                       {triggers.length > 1 && (
                         <button
                           id={`btn-delete-trigger-${trigger.id}`}
-                          title="Deletar Gatilho"
+                          title={lang === 'pt' ? 'Excluir Gatilho' : lang === 'es' ? 'Eliminar Disparador' : 'Delete Trigger'}
                           type="button"
                           onClick={() => {
-                            if (window.confirm(`Excluir o alerta de evento "${trigger.name}" permanentemente?`)) {
+                            const confirmMsg = lang === 'pt' 
+                              ? `Excluir o alerta de evento "${trigger.name}" permanentemente?` 
+                              : lang === 'es' 
+                              ? `¿Eliminar la alerta de evento "${trigger.name}" permanentemente?` 
+                              : `Delete the event alert "${trigger.name}" permanently?`;
+                            if (window.confirm(confirmMsg)) {
                               onDeleteTrigger(trigger.id);
                             }
                           }}
@@ -628,7 +684,7 @@ export function TriggerConfig({
 
                   <div className="flex items-center justify-between border-t border-zinc-900/60 pt-3 mt-3">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[10px] text-zinc-500 uppercase font-bold">Ação de Som Ativa:</span>
+                      <span className="text-[10px] text-zinc-500 uppercase font-black">{lang === 'pt' ? 'Ação de Som Ativa:' : lang === 'es' ? 'Sonido Activo:' : 'Active Sound Action:'}</span>
                       <span className="text-[10px] text-zinc-300 font-mono tracking-tight max-w-[280px] sm:max-w-[400px] truncate block">
                         {trigger.soundType === 'synth' && `preset: ${trigger.soundValue}`}
                         {trigger.soundType === 'speech' && (trigger.soundValue ? `"${trigger.soundValue}"` : `Dinâmico (Automático)`)}
@@ -647,13 +703,15 @@ export function TriggerConfig({
                           enabled: !trigger.enabled
                         });
                       }}
-                      className={`p-1 rounded text-[10px] px-2 font-sans font-bold uppercase tracking-wider transition-colors cursor-pointer ${
+                      className={`p-1 rounded text-[10px] px-2 font-sans font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${
                         trigger.enabled 
                           ? 'bg-zinc-800 text-zinc-300 hover:bg-zinc-750' 
                           : 'bg-zinc-950 text-zinc-650 hover:bg-zinc-900'
                       }`}
                     >
-                      {trigger.enabled ? 'Ativo' : 'Parado'}
+                      {trigger.enabled 
+                        ? (lang === 'pt' ? 'Ativo' : lang === 'es' ? 'Activo' : 'Active') 
+                        : (lang === 'pt' ? 'Parado' : lang === 'es' ? 'Inactivo' : 'Disabled')}
                     </button>
                   </div>
                 </div>
@@ -662,9 +720,13 @@ export function TriggerConfig({
               {visibleTriggers.length === 0 && selectedPrinterId && (
                 <div className="text-center py-12 px-4 border border-dashed border-zinc-800 rounded-xl bg-zinc-950/20">
                   <Volume2 className="w-10 h-10 text-zinc-750 mx-auto mb-3" />
-                  <p className="text-zinc-400 text-xs font-sans mb-1 font-bold">Sem alertas programados para esta impressora</p>
+                  <p className="text-zinc-400 text-xs font-sans mb-1 font-bold">{lang === 'pt' ? 'Sem alertas programados para esta impressora' : lang === 'es' ? 'Ninguna alerta programada para esta impresora' : 'No sound alerts programmed for this printer'}</p>
                   <p className="text-zinc-500 text-[11px] font-sans mb-5 max-w-sm mx-auto leading-relaxed">
-                    Você pode adicionar gatilhos manuais, ou simplesmente criar um pacote completo de alarmes padrão com um único clique.
+                    {lang === 'pt' 
+                      ? 'Você pode adicionar gatilhos manuais, ou simplesmente criar um pacote completo de alarmes padrão com um único clique.' 
+                      : lang === 'es' 
+                      ? 'Puedes agregar disparadores manuales, o simplemente crear un paquete de alarmas estándar con un solo clic.' 
+                      : 'You can add manual triggers, or simply generate a full set of recommended default alerts with a single click.'}
                   </p>
                   <button
                     id="btn-generate-default-triggers"
@@ -672,7 +734,7 @@ export function TriggerConfig({
                     onClick={handleGenerateDefaultTriggers}
                     className="px-4 py-2 bg-emerald-600/10 border border-emerald-900/40 text-emerald-400 hover:bg-emerald-600/20 text-xs font-bold rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 mx-auto"
                   >
-                    <Plus className="w-3.5 h-3.5" /> Criar Alertas Padrão Recomendados
+                    <Plus className="w-3.5 h-3.5" /> {lang === 'pt' ? 'Criar Alertas Padrão Recomendados' : lang === 'es' ? 'Generar Alertas por Defecto Recomendadas' : 'Generate Recommended Default Alerts'}
                   </button>
                 </div>
               )}
@@ -682,9 +744,13 @@ export function TriggerConfig({
           <div className="p-3.5 bg-emerald-950/10 border border-emerald-900/20 rounded-xl flex items-start gap-2.5 mt-6 font-sans select-none">
             <HelpCircle className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
             <div>
-              <h5 className="font-bold text-xs text-emerald-300">Como funciona o monitoramento por terminal?</h5>
+              <h5 className="font-bold text-xs text-emerald-300">{lang === 'pt' ? 'Como funciona o monitoramento por terminal?' : lang === 'es' ? '¿Cómo funciona la escucha por terminal?' : 'How does terminal monitoring work?'}</h5>
               <p className="text-[11px] text-emerald-400/80 mt-1 leading-relaxed">
-                As impressoras informam seu estado pela conexão WebSocket em tempo real. O monitor escuta as respostas e executa o sintetizador local ou a fala sintetizada com o nome do equipamento para alertar você no alto-falante onde quer que esteja!
+                {lang === 'pt' 
+                  ? 'As impressoras informam seu estado pela conexão WebSocket em tempo real. O monitor escuta as respostas e executa o sintetizador local ou a fala sintetizada com o nome do equipamento para alertar você no alto-falante onde quer que esteja!' 
+                  : lang === 'es' 
+                  ? 'Las impresoras transmiten su estado a través de la conexión WebSocket en tempo real. ¡El sistema de monitoreo detecta las palabras clave y activa el sonido sintético o voz con el nombre del equipo para avisarte de inmediato!' 
+                  : 'Printers broadcast their status over real-time WebSocket connection. The printer monitor captures these target keywords and triggers synthesized beeps or voices with the equipment name over your local speakers!'}
               </p>
             </div>
           </div>
