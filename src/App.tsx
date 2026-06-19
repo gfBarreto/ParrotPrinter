@@ -18,7 +18,7 @@ import { translations, Language } from './translations';
 import logoUrl from './assets/images/regenerated_image_1781812433016.png';
 import { 
   Radio, ShieldAlert, Activity, Database, CheckSquare, Settings, 
-  Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders, AlertTriangle
+  Bot, RefreshCw, Volume2, HelpCircle, HardDrive, LayoutDashboard, History, Sliders, AlertTriangle, Heart
 } from 'lucide-react';
 
 function checkLineMatchesPattern(line: string, pattern: string): boolean {
@@ -778,6 +778,21 @@ export default function App() {
               <RefreshCw className={`w-3.5 h-3.5 ${isUpdating ? 'animate-spin' : ''}`} />
               {isUpdating ? t.updating : (lang === 'pt' ? 'Atualizar Sistema' : lang === 'es' ? 'Actualizar Sistema' : 'Update System')}
             </button>
+          </div>
+
+          {/* Nota do Projeto / Comunidade gfBarreto3d */}
+          <div className="mt-3 pt-2.5 border-t border-zinc-850/60 font-sans text-[10px] text-zinc-400 leading-normal space-y-1 bg-zinc-950/40 p-2.5 rounded-lg border border-zinc-850/40">
+            <div className="flex items-center gap-1.5 font-bold text-zinc-300">
+              <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 animate-pulse" />
+              <span>{lang === 'pt' ? 'Comunidade gfBarreto3d' : lang === 'es' ? 'Comunidad gfBarreto3d' : 'gfBarreto3d Community'}</span>
+            </div>
+            <p className="text-zinc-500 font-semibold leading-normal antialiased text-[10px]">
+              {lang === 'pt' 
+                ? 'Este projeto foi desenvolvido com auxílio da IA do Google por gfBarreto3d para uso pessoal. Resolvi disponibilizar para toda a comunidade por ter ajudado significativamente no meu cotidiano com as impressoras!' 
+                : lang === 'es' 
+                ? 'Este proyecto fue desarrollado con el apoyo de la IA de Google por gfBarreto3d para uso personal. ¡Decidí compartirlo con toda la comunidad ya que me ha ayudado mucho en mi trabajo diario con las impresoras!' 
+                : 'This project was developed with assistance from Google AI by gfBarreto3d for personal use. I decided to release it to the entire community as it significantly helped my daily work with the printers!'}
+            </p>
           </div>
         </div>
       </aside>
