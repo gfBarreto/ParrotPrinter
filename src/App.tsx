@@ -888,7 +888,7 @@ export default function App() {
 
             {/* Versão (sempre visível) */}
             <div className="flex items-center gap-2 text-[10px] font-mono select-none px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-full shadow-inner leading-none">
-              <span className="text-zinc-500 font-semibold">v{versionInfo?.currentVersion || "1.1.1"}</span>
+              <span className="text-zinc-500 font-semibold">v{versionInfo?.currentVersion || "1.1.2"}</span>
               {versionInfo?.hasUpdate ? (
                 <div className="flex items-center gap-1.5 border-l border-zinc-800 pl-2">
                   <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse shrink-0" />
