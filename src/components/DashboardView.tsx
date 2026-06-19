@@ -145,26 +145,6 @@ export function DashboardView({
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Audio Activation Alert bar */}
-      {audioBlockerActive && (
-        <button
-          onClick={clearAudioBlocker}
-          className="w-full flex items-center justify-between p-4 bg-emerald-900 border border-emerald-600 rounded-xl text-emerald-100 hover:bg-emerald-850 cursor-pointer transition-all duration-300 animate-pulse font-sans shadow-lg"
-          id="btn-clear-audio-block"
-        >
-          <div className="flex items-center gap-3">
-            <Volume2 className="w-5 h-5 text-emerald-300" />
-            <div className="text-left">
-              <div className="font-bold text-sm">Controle de Som Bloqueado pelo Navegador</div>
-              <div className="text-xs text-emerald-300">Clique em qualquer lugar deste aviso para autorizar a reprodução dos sintetizadores e vozes.</div>
-            </div>
-          </div>
-          <span className="bg-emerald-950 px-3 py-1 rounded-md text-xs font-semibold text-emerald-300 select-none">
-            Autorizar Áudio
-          </span>
-        </button>
-      )}
-
       {/* Grid status cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Connection status */}
@@ -576,66 +556,6 @@ export function DashboardView({
             </div>
           </div>
           
-          {/* DB Control Options */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3.5">
-            <button
-              id="btn-toggle-backup-restore"
-              onClick={() => setIsBackupSectionOpen(!isBackupSectionOpen)}
-              className="w-full flex items-center justify-between font-semibold text-xs text-zinc-300 hover:text-white"
-            >
-              <span className="flex items-center gap-1.5">
-                <Database className="w-4 h-4 text-zinc-500" />
-                Backup & Restauração do Banco
-              </span>
-              <span className="text-[10px] text-zinc-500 hover:underline">
-                {isBackupSectionOpen ? 'Ocultar' : 'Abrir'}
-              </span>
-            </button>
-
-            {isBackupSectionOpen && (
-              <div className="grid grid-cols-2 gap-3 pb-1 animate-fadeIn">
-                <button
-                  id="btn-backup-export"
-                  onClick={handleExportDB}
-                  className="flex items-center justify-center gap-1 bg-zinc-950 hover:bg-zinc-850 border border-zinc-800 py-2 rounded font-sans font-semibold text-[11px] text-zinc-200"
-                >
-                  <Download className="w-3.5 h-3.5 text-zinc-400" /> Exportar JSON
-                </button>
-                <div className="relative">
-                  <input
-                    id="btn-backup-import-input"
-                    type="file"
-                    accept=".json"
-                    onChange={handleImportDB}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                  />
-                  <button
-                    id="btn-backup-import-placeholder"
-                    type="button"
-                    className="w-full flex items-center justify-center gap-1 bg-zinc-950 hover:bg-zinc-850 border border-zinc-800 py-2 rounded font-sans font-semibold text-[11px] text-zinc-200"
-                  >
-                    <Upload className="w-3.5 h-3.5 text-zinc-400" /> Importar JSON
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Windows Startup Hook Option */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 space-y-3">
-            <div className="flex items-center gap-2">
-              <Laptop className="w-4 h-4 text-emerald-400" />
-              <h4 className="font-bold text-[11px] text-zinc-100 uppercase tracking-wider">Iniciar com o Windows (Oculto)</h4>
-            </div>
-            <p className="text-[11px] text-zinc-400 leading-relaxed font-medium">
-              Configure o aplicativo para rodar automaticamente em segundo plano (invisível) sempre que o seu computador for ligado!
-            </p>
-            <div className="bg-zinc-950 border border-zinc-850/60 rounded-lg p-2.5 text-[10px] text-zinc-400 font-mono space-y-1 leading-relaxed">
-              <div>1. Na barra superior do menu, clique em <strong className="text-zinc-200">"Configurações &gt; Download ZIP"</strong> para obter os arquivos do app.</div>
-              <div>2. Dê dois cliques em <strong className="text-emerald-400 font-bold">iniciar-com-o-windows.bat</strong> na raiz da pasta.</div>
-              <div>3. Pressione a opção <strong className="text-emerald-400 font-bold">1</strong> e o atalho invisível será instalado com sucesso!</div>
-            </div>
-          </div>
         </div>
 
       </div>

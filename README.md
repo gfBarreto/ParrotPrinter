@@ -17,7 +17,7 @@ Para executar o ParrotPrinter no seu computador local, você precisa ter instala
 2. **Git**: Permite sincronizar, clonar do GitHub e fazer atualizações automáticas via navegador ou scripts em 1-clique.
 
 ### 🪄 Instalador Automático de Prerrequisitos (Windows)
-Foi incluído o script **`instalar-requisitos.bat`** na raiz do projeto. Ele detecta se você possui o Node.JS e o Git. Caso falte algum, ele tentará instalá-los de forma totalmente automática usando o gerenciador de pacotes padrão do Windows (`winget`) e, em seguida, instalará todas as dependências locais via `npm install`.
+Nós incluímos o script **`instalar-requisitos.bat`** na raiz do projeto. Ele detecta se você possui o Node.JS e o Git. Caso falte algum, ele tentará instalá-los de forma totalmente automática usando o gerenciador de pacotes padrão do Windows (`winget`) e, em seguida, instalará todas as dependências locais via `npm install`.
 
 1. Dê 2 cliques no arquivo **`instalar-requisitos.bat`** na raiz da pasta do seu projeto.
 2. Siga as instruções mostradas na tela. Se necessário instalar, reinicie o script após a conclusão para atualizar as variáveis do sistema.
@@ -28,14 +28,15 @@ Foi incluído o script **`instalar-requisitos.bat`** na raiz do projeto. Ele det
 
 Para que os botões de **Atualizar no navegador** e o script **`atualizar.bat`** funcionem, o projeto **precisa** ser baixado usando o Git (pasta `.git` ativa na raiz), e não por download direto do arquivo ZIP bruto.
 
-### Passo 1: Publicar ou Exportar para o GitHub
-Se você editou ou criou o projeto no AI Studio, você pode integrá-lo com seu GitHub através do menu superior para criar um repositório remoto.
+### Passo 1: Publicar ou Sincronizar no GitHub
+O repositório principal está localizado em:
+👉 **`https://github.com/gfBarreto/ParrotPrinter`**
 
 ### Passo 2: Clonar o Repositório Localmente
 1. No seu computador local, abra o **Terminal** ou **Prompt de Comando (CMD)** na pasta onde deseja salvar o projeto.
-2. Copie e cole o comando substituindo os seus dados:
+2. Copie e cole o comando para clonar:
    ```bash
-   git clone https://github.com/gfBarreto/ParrotPrinter
+   git clone https://github.com/gfBarreto/ParrotPrinter.git
    ```
 3. Acesse a pasta criada:
    ```bash
@@ -44,19 +45,30 @@ Se você editou ou criou o projeto no AI Studio, você pode integrá-lo com seu 
 
 ### Passo 3: Executar a Primeira Inicialização
 Agora que a pasta está sincronizada com o GitHub:
-* Dê dois cliques em **`rodar-oculto`** para inicializar o painel e as conexões!
-
-### Passo 4: Nas macros a serem utilizadas no klipper, verificar se existe a linha abaixo como exemplo:
-
-**`RESPOND TYPE=command MSG="print_started" #envia mensagem de inicializar a impressão para o ParrotPrinter`**
+* No Windows: Dê dois cliques em **`rodar-no-windows.bat`** para inicializar o painel e as conexões!
 
 ---
+
+## ⚙️ Configuração das Macros no Klipper / Moonraker
+
+Para que as macros que você deseja receber notificação no **ParrotPrinter** consigam disparar as falas e os alarmes sonoros automaticamente, elas **precisam** retornar uma linha de resposta no console. 
+
+Por exemplo, adicione a linha abaixo à sua macro ou lógica no G-code do Klipper (utilizando a diretiva `RESPOND`):
+
+```gcode
+RESPOND TYPE=command MSG="print_started" #envia mensagem de inicializar a impressão para o ParrotPrinter
+```
+
+*Nota: Você pode emitir quaisquer mensagens personalizadas de gatilho, como `print_started`, `print_error`, `filament_runout`, etc., e cadastrá-las na aba **Gatilhos de Sons** no painel do navegador.*
+
+---
+
 ## 🔄 Como Atualizar o ParrotPrinter
 
 Quando você ou a IA fizerem novas melhorias no projeto, você poderá sincronizá-las no seu computador local instantaneamente através de duas formas:
 
 ### Opção A: Pelo Navegador (Botão na Interface)
-Na página principal do ParrotPrinter no navegador (em `http://localhost:3000`), clique no botão **"Atualizar Sistema"** localizado na aba de configurações. O servidor local fará um `git pull` automático e reiniciará o serviço para você!
+Na página principal do ParrotPrinter no navegador (em `http://localhost:3000`), clique no botão **"Atualizar Sistema"** localizado na aba de configurações. O servidor local fará um `git pull` automático e recarregará as páginas para você!
 
 ### Opção B: Pelo Script Local (`atualizar.bat`)
 1. Entre na pasta do projeto no Windows.
@@ -65,11 +77,53 @@ Na página principal do ParrotPrinter no navegador (em `http://localhost:3000`),
 
 ---
 
-## 💻 Como Instalar e Executar o Projeto Manualmente (Multiplataforma)
+## 💻 Como Instalar e Executar o Projeto Manualmente (Linux e macOS)
 
-Se você preferir executar via terminal no Linux, macOS ou Windows sem usar os scripts `.bat`:
+Se você utiliza **Linux** ou **macOS**, pode realizar a instalação de maneira rápida pelo terminal corporativo/de usuário do sistema seguindo as instruções abaixo:
+
+###  Instalando no macOS (Terminal)
+1. **Instale os prerrequisitos** caso ainda não possua (usando o gerenciador [Homebrew](https://brew.sh)):
    ```bash
-   cd caminho/para/o/projeto/parrot-printer
+   brew install node git
+   ```
+2. **Clone e acesse a pasta:**
+   ```bash
+   git clone https://github.com/gfBarreto/ParrotPrinter.git
+   cd ParrotPrinter
+   ```
+3. **Instale e rode:**
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+### 🐧 Instalando no Linux (Ubuntu / Debian / Raspberry Pi)
+1. **Instale os prerrequisitos:**
+   ```bash
+   sudo apt update
+   sudo apt install -y nodejs npm git
+   ```
+2. **Clone e acesse o diretório:**
+   ```bash
+   git clone https://github.com/gfBarreto/ParrotPrinter.git
+   cd ParrotPrinter
+   ```
+3. **Instale e execute:**
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+Acesse em seu navegador local através do endereço:  
+👉 **`http://localhost:3000`**
+
+---
+
+## 💻 Como Instalar e Executar o Projeto Manualmente (Multiplataforma - Geral)
+
+Se você preferir executar via terminal geral sem os scripts automatizados:
+   ```bash
+   cd caminho/para/o/projeto/ParrotPrinter
    ```
 
 2. Instale todas as dependências necessárias listadas no `package.json`:

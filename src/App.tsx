@@ -143,6 +143,21 @@ export default function App() {
     triggersRef.current = triggers;
   }, [triggers]);
 
+  // Unlock audio blocker transparently on first click or keypress
+  useEffect(() => {
+    const clearBlocker = () => {
+      setAudioBlockerActive(false);
+      window.removeEventListener('click', clearBlocker);
+      window.removeEventListener('keydown', clearBlocker);
+    };
+    window.addEventListener('click', clearBlocker);
+    window.addEventListener('keydown', clearBlocker);
+    return () => {
+      window.removeEventListener('click', clearBlocker);
+      window.removeEventListener('keydown', clearBlocker);
+    };
+  }, []);
+
   // Fetch initial local DB seed
   useEffect(() => {
     const listPrinters = loadPrinters();

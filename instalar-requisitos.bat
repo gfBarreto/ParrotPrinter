@@ -98,7 +98,7 @@ echo SUCESSO! Todos os prerrequisitos do ParrotPrinter estao OK!
 echo.
 echo Como clonar seu projeto do GitHub para o computador local:
 echo 1. Abra o Terminal do Windows (Prompt de Comando) na pasta de destino:
-echo    ^> git clone https://github.com/SEU-USUARIO/nome-do-seu-repositorio.git
+echo    ^> git clone https://github.com/gfBarreto/ParrotPrinter.git
 echo 2. Entre na pasta clonada.
 echo 3. Com isso, os scripts "atualizar.bat" e o botao de Atualizacao do navegador
 echo    funcionarao perfeitamente, sincronizando direto com o seu GitHub!

@@ -421,12 +421,15 @@ async function startServer() {
   app.post("/api/system/update", (req, res) => {
     console.log("[Update API] Solicitação de atualização silenciosa disparada via navegador...");
 
+    // DESATIVADO: Comentado para permitir que o botão funcione sempre sem bloqueio manual
+    /*
     if (!fs.existsSync(path.join(process.cwd(), ".git"))) {
       return res.status(400).json({
         success: false,
         message: "Esta instalação não parece ser um clone do Git (falta a pasta .git). Peça para clonar via git para poder atualizar automaticamente pelo navegador com 1-clique."
       });
     }
+    */
 
     // Run clean fetch & reset hard
     exec("git fetch origin && git reset --hard origin/main", (err, stdout, stderr) => {
